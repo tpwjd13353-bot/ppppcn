@@ -1,22 +1,11 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { readJson, writeJson } from "@/lib/storage";
 import type { ShowcaseData } from "@/lib/showcase";
 
-const FILE = path.join(process.cwd(), "src/data/showcase.json");
 const FALLBACK_PASSWORD = "ddj2026";
 
-async function readData(): Promise<ShowcaseData> {
-  const raw = await fs.readFile(FILE, "utf-8");
-  return JSON.parse(raw) as ShowcaseData;
-}
-
 export async function GET() {
-  try {
-    const data = await readData();
-    return Response.json(data);
-  } catch {
-    return Response.json({ cards: [] });
-  }
+  const data = await readJson<ShowcaseData>("showcase.json", { cards: [] });
+  return Response.json(data);
 }
 
 export async function PUT(req: Request) {
@@ -32,11 +21,10 @@ export async function PUT(req: Request) {
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
-
   if (!body || !Array.isArray(body.cards)) {
     return new Response("Invalid data shape", { status: 400 });
   }
 
-  await fs.writeFile(FILE, JSON.stringify(body, null, 2), "utf-8");
+  await writeJson("showcase.json", body);
   return Response.json({ ok: true });
 }

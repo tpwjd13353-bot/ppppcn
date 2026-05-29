@@ -1,18 +1,8 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { readJson, writeJson } from "@/lib/storage";
+import { notifyNewInquiry } from "@/lib/notify";
 import type { Inquiry, InquiryData } from "@/lib/inquiry";
 
-const FILE = path.join(process.cwd(), "src/data/inquiries.json");
 const FALLBACK_PASSWORD = "ddj2026";
-
-async function readData(): Promise<InquiryData> {
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    return JSON.parse(raw) as InquiryData;
-  } catch {
-    return { inquiries: [] };
-  }
-}
 
 export async function POST(req: Request) {
   let body: Partial<Inquiry>;
@@ -39,9 +29,12 @@ export async function POST(req: Request) {
     message: (body.message ?? "").trim(),
   };
 
-  const data = await readData();
+  const data = await readJson<InquiryData>("inquiries.json", { inquiries: [] });
   data.inquiries.unshift(entry);
-  await fs.writeFile(FILE, JSON.stringify(data, null, 2), "utf-8");
+  await writeJson("inquiries.json", data);
+
+  // 새 문의 알림 (텔레그램/이메일 등 — 환경변수 설정 시에만 동작)
+  notifyNewInquiry(entry).catch(() => {});
 
   return Response.json({ ok: true });
 }
@@ -52,6 +45,6 @@ export async function GET(req: Request) {
   if (pw !== expected) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const data = await readData();
+  const data = await readJson<InquiryData>("inquiries.json", { inquiries: [] });
   return Response.json(data);
 }

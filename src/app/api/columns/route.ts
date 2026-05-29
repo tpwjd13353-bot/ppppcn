@@ -1,21 +1,10 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { readJson, writeJson } from "@/lib/storage";
 import type { ColumnData } from "@/lib/column";
 
-const FILE = path.join(process.cwd(), "src/data/columns.json");
 const FALLBACK_PASSWORD = "ddj2026";
 
-async function readData(): Promise<ColumnData> {
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    return JSON.parse(raw) as ColumnData;
-  } catch {
-    return { columns: [] };
-  }
-}
-
 export async function GET() {
-  const data = await readData();
+  const data = await readJson<ColumnData>("columns.json", { columns: [] });
   return Response.json(data);
 }
 
@@ -36,6 +25,6 @@ export async function PUT(req: Request) {
     return new Response("Invalid data shape", { status: 400 });
   }
 
-  await fs.writeFile(FILE, JSON.stringify(body, null, 2), "utf-8");
+  await writeJson("columns.json", body);
   return Response.json({ ok: true });
 }

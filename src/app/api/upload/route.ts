@@ -1,8 +1,6 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
+import { saveMedia, mediaUrl } from "@/lib/storage";
 
-const SAVE_DIR = path.join(process.cwd(), "public/uploads");
 const FALLBACK_PASSWORD = "ddj2026";
 
 export async function POST(req: Request) {
@@ -25,25 +23,23 @@ export async function POST(req: Request) {
 
   const buf = Buffer.from(await file.arrayBuffer());
 
-  // webp 변환 + 리사이즈로 자동 최적화 (용량 1/5~1/10, 화질 거의 동일)
+  // webp 변환 + 리사이즈로 자동 최적화
   let out: Buffer;
   let ext = "webp";
   try {
     out = await sharp(buf)
-      .rotate() // EXIF 회전 보정
+      .rotate()
       .resize(1280, 1600, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer();
   } catch {
-    // 이미지가 아니거나 변환 실패 시 원본 저장
     out = buf;
     const rawExt = (file.name.split(".").pop() ?? "jpg").toLowerCase();
     ext = /^(jpg|jpeg|png|webp|gif)$/.test(rawExt) ? rawExt : "jpg";
   }
 
   const filename = `col-${Date.now()}.${ext}`;
-  await fs.mkdir(SAVE_DIR, { recursive: true });
-  await fs.writeFile(path.join(SAVE_DIR, filename), out);
+  await saveMedia(filename, out);
 
-  return Response.json({ ok: true, url: `/uploads/${filename}` });
+  return Response.json({ ok: true, url: mediaUrl(filename) });
 }
