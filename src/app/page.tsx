@@ -2,6 +2,7 @@ import { Hero } from "@/components/sections/Hero";
 import { NoticeBar } from "@/components/sections/NoticeBar";
 import { About } from "@/components/sections/About";
 import { PainPoints } from "@/components/sections/PainPoints";
+import { AnalyzeCTA } from "@/components/sections/AnalyzeCTA";
 import { Solution } from "@/components/sections/Solution";
 import { ContentShowcase } from "@/components/sections/ContentShowcase";
 import { ColumnsPreview } from "@/components/sections/ColumnsPreview";
@@ -16,6 +17,7 @@ export default function HomePage() {
       <ContentShowcase />
       <About />
       <PainPoints />
+      <AnalyzeCTA />
       <Solution />
       <ColumnsPreview />
       <Services />

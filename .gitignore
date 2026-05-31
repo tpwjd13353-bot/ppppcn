@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SQLite (로컬 개발용 DB - 운영은 Railway Volume에 별도 저장)
+/local.db
+/local.db-journal
+/local.db-shm
+/local.db-wal

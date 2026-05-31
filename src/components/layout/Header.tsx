@@ -4,15 +4,22 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Menu, X } from "lucide-react";
+import { Download, LogOut, Menu, User, X } from "lucide-react";
+import { signOutAction } from "@/lib/auth-actions";
 
 const NAV_ITEMS = [
+  { href: "/analyze", label: "분석", highlight: true },
   { href: "/work", label: "Work" },
   { href: "/services", label: "Services" },
   { href: "/insights", label: "Insights" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
+
+type HeaderUser = {
+  name: string | null;
+  image: string | null;
+} | null;
 
 const PROPOSAL_OPTIONS = [
   { label: "따종디엔핑", file: "/proposal-dianping.pdf" },
@@ -23,7 +30,7 @@ const PROPOSAL_OPTIONS = [
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-export function Header() {
+export function Header({ user }: { user: HeaderUser }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [proposalOpen, setProposalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -47,9 +54,18 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-foreground/80 transition-colors hover:text-primary"
+              className={
+                item.highlight
+                  ? "relative font-semibold text-primary transition-colors hover:opacity-80"
+                  : "text-foreground/80 transition-colors hover:text-primary"
+              }
             >
               {item.label}
+              {item.highlight && (
+                <span className="ml-1.5 inline-flex h-4 items-center rounded-full bg-primary/15 px-1.5 text-[10px] font-bold uppercase tracking-wide">
+                  무료
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -63,6 +79,35 @@ export function Header() {
             <Download className="h-4 w-4" />
             제안서
           </button>
+          {user ? (
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-foreground/20 px-3 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+                aria-label="로그아웃"
+              >
+                {user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.image}
+                    alt={user.name ?? "user"}
+                    className="h-6 w-6 rounded-full"
+                  />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
+                <span className="max-w-[120px] truncate">{user.name ?? "회원"}</span>
+                <LogOut className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex h-9 items-center rounded-full border border-foreground/20 px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+            >
+              로그인
+            </Link>
+          )}
           <Link
             href="/contact"
             className="inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
@@ -119,14 +164,58 @@ export function Header() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMenuOpen(false)}
-                        className="border-b border-border/20 py-4 text-lg font-medium text-foreground/90 transition hover:text-primary"
+                        className={
+                          item.highlight
+                            ? "flex items-center justify-between border-b border-border/20 py-4 text-lg font-semibold text-primary transition hover:opacity-80"
+                            : "border-b border-border/20 py-4 text-lg font-medium text-foreground/90 transition hover:text-primary"
+                        }
                       >
-                        {item.label}
+                        <span>{item.label}</span>
+                        {item.highlight && (
+                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                            무료
+                          </span>
+                        )}
                       </Link>
                     ))}
                   </nav>
 
                   <div className="mt-auto flex flex-col gap-3">
+                    {user ? (
+                      <div className="flex items-center justify-between rounded-full border border-border/40 px-4 py-2">
+                        <span className="flex items-center gap-2 text-sm">
+                          {user.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={user.image}
+                              alt={user.name ?? "user"}
+                              className="h-7 w-7 rounded-full"
+                            />
+                          ) : (
+                            <User className="h-4 w-4" />
+                          )}
+                          <span className="max-w-[120px] truncate font-medium">
+                            {user.name ?? "회원"}
+                          </span>
+                        </span>
+                        <form action={signOutAction}>
+                          <button
+                            type="submit"
+                            className="text-xs text-muted-foreground transition hover:text-primary"
+                          >
+                            로그아웃
+                          </button>
+                        </form>
+                      </div>
+                    ) : (
+                      <Link
+                        href="/login"
+                        onClick={() => setMenuOpen(false)}
+                        className="inline-flex h-11 items-center justify-center rounded-full border border-foreground/20 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
+                      >
+                        로그인 / 가입
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setMenuOpen(false);
