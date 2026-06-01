@@ -28,6 +28,8 @@ export interface Page1Conclusion {
 interface Page1Context {
   placeName: string;
   sigungu: string | null;
+  monthlyChinese: number | null;
+  nationalRank: number | null;
 }
 
 export function page1Conclusion(
@@ -35,26 +37,34 @@ export function page1Conclusion(
   ctx: Page1Context,
 ): Page1Conclusion {
   const place = ctx.placeName || "사장님의 매장";
-  const channelLine =
-    "다만 중국인 관광객에게 노출할 채널이 부족합니다\n(따종디엔핑 · 샤오홍슈 · 도우인 등 중국 핵심 플랫폼)";
+  const sg = ctx.sigungu;
+  const m = ctx.monthlyChinese;
+
+  // 데이터 풍부 카피 (시군구·월방문객·디엔핑 70% 녹임)
+  const dataRichLine =
+    sg && m
+      ? `${sg}는 전국 외국인 방문 ${ctx.nationalRank}위, 매월 ${m.toLocaleString()}명의 중국 관광객이 사장님 매장 주변을 지나갑니다.\n그 중 70%가 사용하는 디엔핑·샤오홍슈에 ${place}는 등록되어 있지 않습니다.\n사실상 그들에게 보이지 않는 매장 상태입니다.`
+      : `다만 중국인 관광객에게 노출할 채널이 부족합니다.\n(따종디엔핑 · 샤오홍슈 · 도우인 등 중국 핵심 플랫폼)\n이 격차가 매월 잠재 매출 손실로 이어지고 있습니다.`;
 
   switch (scenario) {
     case "gapBig":
       return {
         headline: `${place}, 입지와 메뉴는 잘 갖춰져 있습니다.`,
-        body: `${channelLine}\n이 격차가 매월 잠재 매출 손실로 이어지고 있습니다.`,
+        body: dataRichLine,
         showLoss: true,
       };
     case "normal":
       return {
         headline: `${place}, 기본 조건은 갖춰져 있습니다.`,
-        body: `${channelLine}\n채널만 정비해도 매출 전환률을 크게 개선할 수 있는 단계입니다.`,
+        body: sg && m
+          ? `${sg} 월 ${m.toLocaleString()}명의 중국 관광객 중 70%가 디엔핑·샤오홍슈를 사용합니다.\n채널만 정비해도 매출 전환률을 크게 개선할 수 있는 단계입니다.`
+          : `다만 중국 마케팅 부분에서 큰 손실이 발생하고 있습니다.\n채널만 정비해도 매출 전환률을 크게 개선할 수 있는 단계입니다.`,
         showLoss: true,
       };
     case "weak":
       return {
         headline: `${place}, 입지·메뉴 조건이 다소 약한 편입니다.`,
-        body: `${channelLine}\n타깃 세분화와 핫스팟 진입으로 경쟁 가게보다 빠르게 격차를 좁힐 수 있습니다.`,
+        body: `다만 중국 마케팅 전략으로 충분히 보완 가능합니다.\n타깃 세분화와 핫스팟 진입으로 경쟁 가게보다 빠르게 격차를 좁힐 수 있습니다.`,
         showLoss: true,
       };
     case "menuFail":

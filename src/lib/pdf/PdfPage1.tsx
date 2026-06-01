@@ -1,6 +1,6 @@
-// 1페이지 — 표지 / 핵심 요약 (개인화 + 데이터 카드)
+// 1페이지 — 표지 / 핵심 요약 (개인화 + 데이터 풍부 + 시급성)
 import { Page, View, Text } from "@react-pdf/renderer";
-import { styles, colors, fontSize, spacing, gradeColor } from "./styles";
+import { styles, colors, fontSize, spacing } from "./styles";
 import { page1Conclusion, lossBoxHeading, type Scenario } from "./scenario";
 import {
   formatLossKRW,
@@ -32,6 +32,8 @@ export function PdfPage1({
   const conclusion = page1Conclusion(scenario, {
     placeName: place.name,
     sigungu,
+    monthlyChinese: loss?.monthlyChineseVisitors ?? null,
+    nationalRank: loss?.nationalRank ?? null,
   });
 
   const dateStr = `${analyzedAt.getFullYear()}.${String(analyzedAt.getMonth() + 1).padStart(2, "0")}.${String(analyzedAt.getDate()).padStart(2, "0")}`;
@@ -135,7 +137,7 @@ export function PdfPage1({
 
       <View style={styles.divider} />
 
-      {/* ===== 점수 박스 3개 (상권·메뉴·마케팅) ===== */}
+      {/* ===== 점수 박스 3개 (점수+등급 가로) ===== */}
       <View style={{ flexDirection: "row", gap: spacing.sm }}>
         <ScoreBox3
           label="상권 분석"
@@ -155,15 +157,6 @@ export function PdfPage1({
           tone="danger"
           subtitle="중국 채널 노출도"
         />
-      </View>
-
-      {/* ===== 격차 막대 3개 ===== */}
-      <View style={{ marginTop: spacing.md }}>
-        <Bar label="상권" value={details.region.score ?? 0} color={colors.primary} />
-        <View style={{ height: 4 }} />
-        <Bar label="메뉴" value={details.menu.score ?? 0} color={colors.primary} />
-        <View style={{ height: 4 }} />
-        <Bar label="마케팅" value={marketing.score} color={colors.danger} />
       </View>
 
       {/* ===== 분석 요약 박스 ===== */}
@@ -199,9 +192,9 @@ export function PdfPage1({
         <Text
           style={{
             fontSize: fontSize.sm,
-            color: colors.textMuted,
+            color: colors.text,
             marginTop: 6,
-            lineHeight: 1.6,
+            lineHeight: 1.65,
           }}
         >
           {conclusion.body}
@@ -228,7 +221,7 @@ export function PdfPage1({
             </Text>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: 700,
                 color: colors.danger,
                 marginTop: 4,
@@ -242,11 +235,55 @@ export function PdfPage1({
         )}
       </View>
 
+      {/* ===== 시급성 박스 — 왜 지금 ===== */}
+      <View
+        style={[
+          styles.card,
+          styles.cardWarning,
+          { marginTop: spacing.sm, padding: spacing.md },
+        ]}
+      >
+        <Text
+          style={{
+            fontSize: fontSize.xs,
+            fontWeight: 700,
+            color: colors.warning,
+            letterSpacing: 1.5,
+            lineHeight: 1.2,
+          }}
+        >
+          지금 시작해야 하는 이유
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            gap: spacing.md,
+            marginTop: spacing.sm,
+          }}
+        >
+          <UrgencyItem
+            big="+15.4%"
+            text="2025년 방한 중국인 증가율"
+            note="한국관광공사"
+          />
+          <UrgencyItem
+            big="무비자 확대"
+            text="2026 단체 관광객 한시 무비자"
+            note="~2026.06.30"
+          />
+          <UrgencyItem
+            big="14일"
+            text="MEITUAN 인증 = 등록 속도"
+            note="자체 등록 8주+"
+          />
+        </View>
+      </View>
+
       {/* ===== 큰 카피 한 줄 ===== */}
       <View style={{ marginTop: spacing.md, alignItems: "center" }}>
         <Text
           style={{
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 700,
             color: colors.text,
             textAlign: "center",
@@ -255,7 +292,7 @@ export function PdfPage1({
         >
           2025년 방한 중국 관광객{" "}
           <Text style={{ color: colors.primary }}>509만 명</Text>.{"\n"}
-          {place.name}, 사장님은 그 중 몇 명을 받고 계십니까?
+          사장님은 그 중 몇 명을 받고 계십니까?
         </Text>
       </View>
 
@@ -264,14 +301,10 @@ export function PdfPage1({
         style={{
           flexDirection: "row",
           gap: spacing.xs,
-          marginTop: spacing.md,
+          marginTop: spacing.sm,
         }}
       >
-        <DataCard
-          big="509만"
-          small="2025년 방한 중국인"
-          note="한국관광공사"
-        />
+        <DataCard big="509만" small="2025년 방한 중국인" note="한국관광공사" />
         <DataCard
           big={
             loss?.monthlyChineseVisitors
@@ -283,11 +316,7 @@ export function PdfPage1({
           highlight
         />
         <DataCard big="70%" small="디엔핑 사용률" note="외식 검색 1위" />
-        <DataCard
-          big="1,012"
-          small="USD 1인 평균지출"
-          note="한국관광공사 2025"
-        />
+        <DataCard big="1,012" small="USD 1인 평균지출" note="한국관광공사 2025" />
       </View>
 
       {/* ===== 푸터 ===== */}
@@ -299,7 +328,7 @@ export function PdfPage1({
             </Text>
           )}
           <Text style={{ marginTop: 2 }}>
-            출처: 한국관광공사 2025  ·  디엔핑 사용률 70% 기반  ·  퍼플페퍼 자체 분석
+            출처: 한국관광공사 2025  ·  디엔핑 사용률 70%  ·  퍼플페퍼 자체 분석
           </Text>
         </View>
         <Text>1 / 3</Text>
@@ -312,7 +341,7 @@ export function PdfPage1({
 // Sub components
 // ─────────────────────────────────────
 
-/** 점수 박스 3분할용 — 등급 큰 글씨 + 점수 큰 글씨 */
+/** 점수 박스 — 점수와 등급을 한 줄(가로)로 배치 */
 function ScoreBox3({
   label,
   score,
@@ -325,8 +354,7 @@ function ScoreBox3({
   subtitle: string;
 }) {
   const accent = tone === "primary" ? colors.primary : colors.danger;
-  const bg =
-    tone === "primary" ? styles.cardPrimary : styles.cardDanger;
+  const bg = tone === "primary" ? styles.cardPrimary : styles.cardDanger;
   const grade = getGradeFromScore(score);
 
   return (
@@ -348,29 +376,37 @@ function ScoreBox3({
       >
         {label}
       </Text>
-      <Text
+      <View
         style={{
-          fontSize: 22,
-          fontWeight: 700,
-          color: accent,
-          marginTop: 6,
-          lineHeight: 1.1,
+          flexDirection: "row",
+          alignItems: "flex-end",
+          gap: 6,
+          marginTop: 8,
+          marginBottom: 6,
         }}
       >
-        {grade}
-      </Text>
-      <Text
-        style={{
-          fontSize: 32,
-          fontWeight: 700,
-          color: accent,
-          marginTop: 2,
-          marginBottom: 4,
-          lineHeight: 1.05,
-        }}
-      >
-        {score === null ? "?" : score}
-      </Text>
+        <Text
+          style={{
+            fontSize: 38,
+            fontWeight: 700,
+            color: accent,
+            lineHeight: 1.0,
+          }}
+        >
+          {score === null ? "?" : score}
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: accent,
+            lineHeight: 1.2,
+            marginBottom: 4,
+          }}
+        >
+          {grade}
+        </Text>
+      </View>
       <Text
         style={{
           fontSize: fontSize.xs,
@@ -395,63 +431,55 @@ function getGradeFromScore(score: number | null): string {
   return "F";
 }
 
-function Bar({
-  label,
-  value,
-  color,
+/** 시급성 박스 안 한 줄 */
+function UrgencyItem({
+  big,
+  text,
+  note,
 }: {
-  label: string;
-  value: number;
-  color: string;
+  big: string;
+  text: string;
+  note?: string;
 }) {
-  const pct = Math.max(0, Math.min(100, value));
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flex: 1 }}>
       <Text
         style={{
-          width: 44,
-          fontSize: fontSize.sm,
-          color: colors.textMuted,
-          fontWeight: 600,
-          lineHeight: 1.2,
-        }}
-      >
-        {label}
-      </Text>
-      <View
-        style={{
-          flex: 1,
-          height: 10,
-          backgroundColor: colors.surface,
-          borderRadius: 2,
-        }}
-      >
-        <View
-          style={{
-            width: `${pct}%`,
-            height: 10,
-            backgroundColor: color,
-            borderRadius: 2,
-          }}
-        />
-      </View>
-      <Text
-        style={{
-          width: 32,
-          textAlign: "right",
-          fontSize: fontSize.sm,
+          fontSize: 15,
           fontWeight: 700,
-          marginLeft: spacing.sm,
-          lineHeight: 1.2,
+          color: colors.warning,
+          lineHeight: 1.1,
         }}
       >
-        {value}
+        {big}
       </Text>
+      <Text
+        style={{
+          fontSize: fontSize.xs,
+          color: colors.text,
+          marginTop: 3,
+          lineHeight: 1.4,
+        }}
+      >
+        {text}
+      </Text>
+      {note && (
+        <Text
+          style={{
+            fontSize: 7,
+            color: colors.textLight,
+            marginTop: 2,
+            lineHeight: 1.2,
+          }}
+        >
+          {note}
+        </Text>
+      )}
     </View>
   );
 }
 
-/** 1페이지 하단 통계 데이터 카드 (4개) */
+/** 1페이지 하단 통계 데이터 카드 */
 function DataCard({
   big,
   small,

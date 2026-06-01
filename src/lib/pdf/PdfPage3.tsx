@@ -14,8 +14,8 @@ interface Props {
 export function PdfPage3({
   place,
   scenario,
-  contactKakao = "http://pf.kakao.com/_xxx",
-  contactPhone = "010-XXXX-XXXX",
+  contactKakao = "https://open.kakao.com/o/skmX5Pwi",
+  contactPhone = "010-2991-5990",
 }: Props) {
   const stage = page3Stage(scenario);
 
