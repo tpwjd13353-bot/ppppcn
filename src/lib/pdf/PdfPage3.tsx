@@ -178,12 +178,11 @@ export function PdfPage3({
           <CTAButton
             primary
             label="카톡으로 상담 신청"
-            sub="(가장 빠른 응답 · 부담 없음)"
             href={contactKakao}
           />
           <CTAButton
             label={`전화 상담  ${contactPhone}`}
-            sub="(즉시 응답 · 평일 10~19시)"
+            sub="평일 10~19시"
             href={`tel:${contactPhone.replace(/[^0-9]/g, "")}`}
           />
         </View>
@@ -199,7 +198,7 @@ export function PdfPage3({
             lineHeight: 1.5,
           }}
         >
-          ★ 메이투안 본사 정식 인증 대행사  ·  12,400개 매장의 따종디엔핑 광고 운영 중
+          ★ 메이투안 본사 정식 인증 대행사  ·  12,400개 매장 광고 레퍼런스 보유
         </Text>
       </View>
       </View>{/* /pageInner */}
@@ -343,11 +342,10 @@ function WeekRow({
 function CTAButton({
   label,
   sub,
-  href,
   primary,
 }: {
   label: string;
-  sub: string;
+  sub?: string;
   href: string;
   primary?: boolean;
 }) {
@@ -371,16 +369,18 @@ function CTAButton({
       >
         {label}
       </Text>
-      <Text
-        style={{
-          fontSize: fontSize.xs,
-          color: primary ? "#E5DEFF" : colors.textMuted,
-          marginTop: 2,
-          lineHeight: 1.3,
-        }}
-      >
-        {sub}  →  {href}
-      </Text>
+      {sub && (
+        <Text
+          style={{
+            fontSize: fontSize.xs,
+            color: primary ? "#D9E1EE" : colors.textMuted,
+            marginTop: 2,
+            lineHeight: 1.3,
+          }}
+        >
+          {sub}
+        </Text>
+      )}
     </View>
   );
 }

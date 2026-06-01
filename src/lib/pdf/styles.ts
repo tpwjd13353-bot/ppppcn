@@ -4,23 +4,24 @@ import { StyleSheet } from "@react-pdf/renderer";
 
 export const colors = {
   bg: "#FFFFFF",
-  surface: "#F7F7F8",
-  surfaceMuted: "#FAFAFA",
-  text: "#1A1A1F",
-  textMuted: "#5B5B62",
-  textLight: "#8B9098",
-  primary: "#6B5BFF", // 퍼플페퍼 보라
-  primaryDeep: "#4A3FCC", // 진한 보라 (헤드라인용)
-  primarySoft: "#EFECFF",
-  primarySofter: "#F5F3FF", // 더 옅은 보라
-  danger: "#E5484D", // 마케팅·위험
-  dangerSoft: "#FDEEEE",
-  warning: "#D97706",
-  warningSoft: "#FEF3C7",
-  success: "#16A34A",
-  successSoft: "#DCFCE7",
-  border: "#E5E5EA",
-  borderStrong: "#C7C7CC",
+  surface: "#F6F7F8",
+  surfaceMuted: "#FAFAFB",
+  text: "#1A1F2C",
+  textMuted: "#525866",
+  textLight: "#838999",
+  // 보고서 톤 — 딥 네이비 (퍼플페퍼 브랜드는 사이트에서만, 보고서는 차분한 비즈니스 톤)
+  primary: "#1F3A5F", // 딥 네이비
+  primaryDeep: "#0F2845", // 더 진한 네이비
+  primarySoft: "#E8EEF5", // 옅은 네이비 배경
+  primarySofter: "#F2F5F9",
+  danger: "#B8413F", // 더 묵직한 빨강 (촌스러운 빨강 X)
+  dangerSoft: "#F7E8E7",
+  warning: "#9C6A0E", // 진한 머스타드 (촌스러운 노랑 X)
+  warningSoft: "#F5EFE0",
+  success: "#2D7A3F",
+  successSoft: "#E6F2EA",
+  border: "#E2E5EA",
+  borderStrong: "#C7CCD3",
 };
 
 export const spacing = {
