@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText, Users as UsersIcon } from "lucide-react";
 import {
   GRADIENT_PRESETS,
   PLATFORM_OPTIONS,
@@ -236,6 +236,13 @@ export default function AdminPage() {
             >
               <Inbox className="h-4 w-4" />
               상담 신청 내역
+            </a>
+            <a
+              href="/admin/users"
+              className="inline-flex items-center gap-2 rounded-md border border-primary/50 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
+            >
+              <UsersIcon className="h-4 w-4" />
+              회원 관리
             </a>
             <button
               onClick={logout}
