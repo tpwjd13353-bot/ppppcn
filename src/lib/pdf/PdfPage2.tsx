@@ -1,7 +1,7 @@
 // 2페이지 — 상세 진단
 import { Page, View, Text } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing, gradeColor } from "./styles";
-import { page2GapLine, type Scenario } from "./scenario";
+import { page2GapLine, lossBoxHeading, type Scenario } from "./scenario";
 import {
   formatLossKRW,
   type LossEstimate,
@@ -32,9 +32,8 @@ const CATEGORY_ORDER: { key: string; label: string; score: number }[] = [
 const TABLE_LIMIT = 6;
 
 export function PdfPage2({ place, result, scenario, loss }: Props) {
-  const { store, marketing, details } = result;
+  const { marketing, details } = result;
   const { region, menu } = details;
-  const gap = store.score - marketing.score;
 
   const categoryCounts = new Map<string, number>();
   for (const m of menu.matches) {
@@ -230,8 +229,10 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       {/* ===== C. 손실 격차 ===== */}
       <SectionHeader title="손실 격차" />
       <View style={{ marginTop: spacing.sm }}>
-        <Bar label="상권" value={store.score} color={colors.primary} />
-        <View style={{ height: 5 }} />
+        <Bar label="상권" value={region.score} color={colors.primary} />
+        <View style={{ height: 4 }} />
+        <Bar label="메뉴" value={menu.score ?? 0} color={colors.primary} />
+        <View style={{ height: 4 }} />
         <Bar label="마케팅" value={marketing.score} color={colors.danger} />
       </View>
       <Text
@@ -262,7 +263,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
               lineHeight: 1.2,
             }}
           >
-            연 잠재 매출 손실  (보수적 추정)
+            {lossBoxHeading(loss.sigungu)}
           </Text>
           <Text
             style={{
@@ -281,8 +282,8 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
 
       <View style={styles.footer}>
         <Text>
-          {place.name}  ·  상권 {store.score}({store.grade}) / 마케팅{" "}
-          {marketing.score}({marketing.grade}) / 격차 {gap}
+          {place.name}  ·  상권 {region.score} / 메뉴 {menu.score ?? "?"} / 마케팅{" "}
+          {marketing.score}
         </Text>
         <Text>2 / 3</Text>
       </View>

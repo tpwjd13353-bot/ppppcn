@@ -1,7 +1,7 @@
-// 1페이지 — 표지 / 핵심 요약
+// 1페이지 — 표지 / 핵심 요약 (개인화 + 데이터 카드)
 import { Page, View, Text } from "@react-pdf/renderer";
-import { styles, colors, fontSize, spacing } from "./styles";
-import { page1Conclusion, type Scenario } from "./scenario";
+import { styles, colors, fontSize, spacing, gradeColor } from "./styles";
+import { page1Conclusion, lossBoxHeading, type Scenario } from "./scenario";
 import {
   formatLossKRW,
   type LossEstimate,
@@ -26,9 +26,13 @@ export function PdfPage1({
   analyzedAt,
   reportId,
 }: Props) {
-  const { store, marketing, details } = result;
-  const gap = store.score - marketing.score;
-  const conclusion = page1Conclusion(scenario, gap);
+  const { marketing, details } = result;
+  const sigungu = loss?.sigungu ?? null;
+
+  const conclusion = page1Conclusion(scenario, {
+    placeName: place.name,
+    sigungu,
+  });
 
   const dateStr = `${analyzedAt.getFullYear()}.${String(analyzedAt.getMonth() + 1).padStart(2, "0")}.${String(analyzedAt.getDate()).padStart(2, "0")}`;
   const reportShortId = reportId.slice(-6);
@@ -57,12 +61,34 @@ export function PdfPage1({
           </Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
-          <Text style={styles.badgeOutline}>★ MEITUAN OFFICIAL PARTNER</Text>
+          <View
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 5,
+              borderRadius: 999,
+              borderWidth: 0.6,
+              borderColor: colors.primary,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 8,
+                fontWeight: 700,
+                color: colors.primary,
+                letterSpacing: 1,
+                textAlign: "center",
+                lineHeight: 1.2,
+              }}
+            >
+              ★  MEITUAN OFFICIAL PARTNER
+            </Text>
+          </View>
           <Text
             style={{
               fontSize: fontSize.xs,
               color: colors.textMuted,
               marginTop: 4,
+              lineHeight: 1.2,
             }}
           >
             메이투안 본사 정식 인증 대행사
@@ -71,10 +97,10 @@ export function PdfPage1({
       </View>
 
       {/* ===== 상호명 정보 ===== */}
-      <View style={{ marginTop: spacing.xl }}>
+      <View style={{ marginTop: spacing.lg }}>
         <Text
           style={{
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: 700,
             color: colors.text,
             letterSpacing: -0.5,
@@ -87,7 +113,7 @@ export function PdfPage1({
           style={{
             fontSize: fontSize.md,
             color: colors.textMuted,
-            marginTop: spacing.sm,
+            marginTop: spacing.xs,
             lineHeight: 1.4,
           }}
         >
@@ -99,7 +125,7 @@ export function PdfPage1({
           style={{
             fontSize: fontSize.xs,
             color: colors.textLight,
-            marginTop: spacing.xs,
+            marginTop: 2,
             lineHeight: 1.4,
           }}
         >
@@ -109,27 +135,35 @@ export function PdfPage1({
 
       <View style={styles.divider} />
 
-      {/* ===== 점수 박스 2개 ===== */}
-      <View style={{ flexDirection: "row", gap: spacing.md }}>
-        <ScoreBox
-          label="상권 종합"
-          score={store.score}
-          grade={store.grade}
+      {/* ===== 점수 박스 3개 (상권·메뉴·마케팅) ===== */}
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <ScoreBox3
+          label="상권 분석"
+          score={details.region.score}
           tone="primary"
-          subtitle={`지역 ${details.region.score}점  ·  메뉴 ${details.menu.score ?? "?"}${details.menu.score !== null ? "점" : ""}`}
+          subtitle="지역 매칭 점수"
         />
-        <ScoreBox
+        <ScoreBox3
+          label="메뉴 분석"
+          score={details.menu.score}
+          tone="primary"
+          subtitle={`${details.menu.matchedCount}/${details.menu.matches.length} 매칭`}
+        />
+        <ScoreBox3
           label="마케팅"
           score={marketing.score}
-          grade={marketing.grade}
           tone="danger"
-          subtitle="중국 마케팅 플랫폼 미노출"
+          subtitle="중국 채널 노출도"
         />
       </View>
 
-      {/* ===== 격차 막대 ===== */}
-      <View style={{ marginTop: spacing.lg }}>
-        <GapBars storeScore={store.score} marketingScore={marketing.score} />
+      {/* ===== 격차 막대 3개 ===== */}
+      <View style={{ marginTop: spacing.md }}>
+        <Bar label="상권" value={details.region.score ?? 0} color={colors.primary} />
+        <View style={{ height: 4 }} />
+        <Bar label="메뉴" value={details.menu.score ?? 0} color={colors.primary} />
+        <View style={{ height: 4 }} />
+        <Bar label="마케팅" value={marketing.score} color={colors.danger} />
       </View>
 
       {/* ===== 분석 요약 박스 ===== */}
@@ -137,7 +171,7 @@ export function PdfPage1({
         style={[
           styles.card,
           styles.cardPrimary,
-          { marginTop: spacing.lg, padding: spacing.lg },
+          { marginTop: spacing.md, padding: spacing.md },
         ]}
       >
         <Text
@@ -155,8 +189,8 @@ export function PdfPage1({
           style={{
             fontSize: fontSize.md,
             fontWeight: 700,
-            marginTop: spacing.sm,
-            lineHeight: 1.5,
+            marginTop: 6,
+            lineHeight: 1.45,
             color: colors.text,
           }}
         >
@@ -164,9 +198,9 @@ export function PdfPage1({
         </Text>
         <Text
           style={{
-            fontSize: fontSize.base,
+            fontSize: fontSize.sm,
             color: colors.textMuted,
-            marginTop: spacing.xs,
+            marginTop: 6,
             lineHeight: 1.6,
           }}
         >
@@ -177,7 +211,7 @@ export function PdfPage1({
           <View
             style={{
               marginTop: spacing.md,
-              paddingTop: spacing.md,
+              paddingTop: spacing.sm,
               borderTopWidth: 0.6,
               borderTopColor: colors.primary,
             }}
@@ -186,18 +220,18 @@ export function PdfPage1({
               style={{
                 fontSize: fontSize.xs,
                 color: colors.textMuted,
-                letterSpacing: 0.8,
+                letterSpacing: 0.6,
                 lineHeight: 1.2,
               }}
             >
-              연 잠재 매출 손실  (보수적 추정)
+              {lossBoxHeading(sigungu)}
             </Text>
             <Text
               style={{
                 fontSize: 18,
                 fontWeight: 700,
                 color: colors.danger,
-                marginTop: 6,
+                marginTop: 4,
                 lineHeight: 1.2,
               }}
             >
@@ -206,6 +240,54 @@ export function PdfPage1({
             </Text>
           </View>
         )}
+      </View>
+
+      {/* ===== 큰 카피 한 줄 ===== */}
+      <View style={{ marginTop: spacing.md, alignItems: "center" }}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: colors.text,
+            textAlign: "center",
+            lineHeight: 1.5,
+          }}
+        >
+          2025년 방한 중국 관광객{" "}
+          <Text style={{ color: colors.primary }}>509만 명</Text>.{"\n"}
+          {place.name}, 사장님은 그 중 몇 명을 받고 계십니까?
+        </Text>
+      </View>
+
+      {/* ===== 데이터 카드 4개 ===== */}
+      <View
+        style={{
+          flexDirection: "row",
+          gap: spacing.xs,
+          marginTop: spacing.md,
+        }}
+      >
+        <DataCard
+          big="509만"
+          small="2025년 방한 중국인"
+          note="한국관광공사"
+        />
+        <DataCard
+          big={
+            loss?.monthlyChineseVisitors
+              ? `${(loss.monthlyChineseVisitors / 1000).toFixed(loss.monthlyChineseVisitors >= 10000 ? 0 : 1)}천명`
+              : "—"
+          }
+          small={sigungu ? `${sigungu} 월 중국인` : "월 중국인 방문"}
+          note={sigungu ? `전국 ${loss?.nationalRank}위` : ""}
+          highlight
+        />
+        <DataCard big="70%" small="디엔핑 사용률" note="외식 검색 1위" />
+        <DataCard
+          big="1,012"
+          small="USD 1인 평균지출"
+          note="한국관광공사 2025"
+        />
       </View>
 
       {/* ===== 푸터 ===== */}
@@ -230,69 +312,87 @@ export function PdfPage1({
 // Sub components
 // ─────────────────────────────────────
 
-function ScoreBox({
+/** 점수 박스 3분할용 — 등급 큰 글씨 + 점수 큰 글씨 */
+function ScoreBox3({
   label,
   score,
-  grade,
-  subtitle,
   tone,
+  subtitle,
 }: {
   label: string;
-  score: number;
-  grade: string;
-  subtitle: string;
+  score: number | null;
   tone: "primary" | "danger";
+  subtitle: string;
 }) {
   const accent = tone === "primary" ? colors.primary : colors.danger;
-  const badgeBg = tone === "primary" ? colors.primarySoft : colors.dangerSoft;
+  const bg =
+    tone === "primary" ? styles.cardPrimary : styles.cardDanger;
+  const grade = getGradeFromScore(score);
 
   return (
     <View
       style={[
-        styles.scoreBox,
-        tone === "primary" ? styles.cardPrimary : styles.cardDanger,
+        styles.card,
+        bg,
+        { flex: 1, padding: spacing.md, alignItems: "center" },
       ]}
     >
-      <View style={styles.scoreLabel}>
-        <Text style={styles.scoreLabelText}>{label}</Text>
-        <Text
-          style={[styles.badge, { color: accent, backgroundColor: badgeBg }]}
-        >
-          {grade}
-        </Text>
-      </View>
-      <Text style={[styles.scoreValue, { color: accent }]}>{score}</Text>
-      <Text style={styles.scoreSubtitle}>{subtitle}</Text>
+      <Text
+        style={{
+          fontSize: fontSize.xs,
+          fontWeight: 600,
+          color: colors.textMuted,
+          letterSpacing: 0.5,
+          lineHeight: 1.2,
+        }}
+      >
+        {label}
+      </Text>
+      <Text
+        style={{
+          fontSize: 22,
+          fontWeight: 700,
+          color: accent,
+          marginTop: 6,
+          lineHeight: 1.1,
+        }}
+      >
+        {grade}
+      </Text>
+      <Text
+        style={{
+          fontSize: 32,
+          fontWeight: 700,
+          color: accent,
+          marginTop: 2,
+          marginBottom: 4,
+          lineHeight: 1.05,
+        }}
+      >
+        {score === null ? "?" : score}
+      </Text>
+      <Text
+        style={{
+          fontSize: fontSize.xs,
+          color: colors.textMuted,
+          textAlign: "center",
+          lineHeight: 1.3,
+        }}
+      >
+        {subtitle}
+      </Text>
     </View>
   );
 }
 
-function GapBars({
-  storeScore,
-  marketingScore,
-}: {
-  storeScore: number;
-  marketingScore: number;
-}) {
-  const gap = storeScore - marketingScore;
-  return (
-    <View>
-      <Bar label="상권" value={storeScore} color={colors.primary} />
-      <View style={{ height: 6 }} />
-      <Bar label="마케팅" value={marketingScore} color={colors.danger} />
-      <Text
-        style={{
-          marginTop: spacing.sm,
-          fontSize: fontSize.sm,
-          color: colors.textMuted,
-          textAlign: "center",
-          lineHeight: 1.2,
-        }}
-      >
-        ← 격차 {gap}점 →
-      </Text>
-    </View>
-  );
+function getGradeFromScore(score: number | null): string {
+  if (score === null) return "?";
+  if (score >= 90) return "A";
+  if (score >= 80) return "B+";
+  if (score >= 70) return "B";
+  if (score >= 60) return "C";
+  if (score >= 50) return "D";
+  return "F";
 }
 
 function Bar({
@@ -309,7 +409,7 @@ function Bar({
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Text
         style={{
-          width: 48,
+          width: 44,
           fontSize: fontSize.sm,
           color: colors.textMuted,
           fontWeight: 600,
@@ -321,7 +421,7 @@ function Bar({
       <View
         style={{
           flex: 1,
-          height: 12,
+          height: 10,
           backgroundColor: colors.surface,
           borderRadius: 2,
         }}
@@ -329,7 +429,7 @@ function Bar({
         <View
           style={{
             width: `${pct}%`,
-            height: 12,
+            height: 10,
             backgroundColor: color,
             borderRadius: 2,
           }}
@@ -347,6 +447,68 @@ function Bar({
       >
         {value}
       </Text>
+    </View>
+  );
+}
+
+/** 1페이지 하단 통계 데이터 카드 (4개) */
+function DataCard({
+  big,
+  small,
+  note,
+  highlight,
+}: {
+  big: string;
+  small: string;
+  note?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <View
+      style={[
+        styles.card,
+        highlight ? styles.cardPrimary : styles.cardSurface,
+        {
+          flex: 1,
+          padding: spacing.sm,
+          alignItems: "center",
+        },
+      ]}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: highlight ? colors.primary : colors.text,
+          lineHeight: 1.1,
+        }}
+      >
+        {big}
+      </Text>
+      <Text
+        style={{
+          fontSize: fontSize.xs,
+          color: colors.text,
+          marginTop: 4,
+          textAlign: "center",
+          lineHeight: 1.3,
+        }}
+      >
+        {small}
+      </Text>
+      {note && (
+        <Text
+          style={{
+            fontSize: 7,
+            color: colors.textLight,
+            marginTop: 2,
+            textAlign: "center",
+            lineHeight: 1.2,
+          }}
+        >
+          {note}
+        </Text>
+      )}
     </View>
   );
 }

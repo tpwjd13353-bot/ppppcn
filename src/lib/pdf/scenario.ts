@@ -16,7 +16,7 @@ export function pickScenario(result: AnalysisResult): Scenario {
 }
 
 // ===================
-// 1페이지 결론 박스
+// 1페이지 결론 박스 (개인화 변수 적용)
 // ===================
 
 export interface Page1Conclusion {
@@ -25,42 +25,59 @@ export interface Page1Conclusion {
   showLoss: boolean;
 }
 
+interface Page1Context {
+  placeName: string;
+  sigungu: string | null;
+}
+
 export function page1Conclusion(
   scenario: Scenario,
-  gap: number,
+  ctx: Page1Context,
 ): Page1Conclusion {
+  const place = ctx.placeName || "사장님의 매장";
+  const channelLine =
+    "다만 중국인 관광객에게 노출할 채널이 부족합니다\n(따종디엔핑 · 샤오홍슈 · 도우인 등 중국 핵심 플랫폼)";
+
   switch (scenario) {
     case "gapBig":
       return {
-        headline: "사장님의 매장은 입지와 메뉴가 잘 갖춰져 있습니다.",
-        body: `다만 중국 마케팅이 비어 있는 상태입니다.\n격차 ${gap}점이 매월 잠재 매출 손실로 이어지고 있습니다.`,
+        headline: `${place}, 입지와 메뉴는 잘 갖춰져 있습니다.`,
+        body: `${channelLine}\n이 격차가 매월 잠재 매출 손실로 이어지고 있습니다.`,
         showLoss: true,
       };
     case "normal":
       return {
-        headline: "사장님의 매장은 기본 조건이 갖춰져 있습니다.",
-        body: "다만 중국 마케팅 부분에서 큰 손실이 발생하고 있습니다.\n마케팅 점수만 끌어올려도 매출 전환률을 크게 개선할 수 있는 단계입니다.",
+        headline: `${place}, 기본 조건은 갖춰져 있습니다.`,
+        body: `${channelLine}\n채널만 정비해도 매출 전환률을 크게 개선할 수 있는 단계입니다.`,
         showLoss: true,
       };
     case "weak":
       return {
-        headline: "사장님의 매장은 입지·메뉴 조건이 다소 약한 편입니다.",
-        body: "다만 중국 마케팅 전략으로 충분히 보완 가능합니다.\n타깃 세분화와 핫스팟 진입으로 경쟁 가게보다 빠르게 격차를 좁힐 수 있습니다.",
+        headline: `${place}, 입지·메뉴 조건이 다소 약한 편입니다.`,
+        body: `${channelLine}\n타깃 세분화와 핫스팟 진입으로 경쟁 가게보다 빠르게 격차를 좁힐 수 있습니다.`,
         showLoss: true,
       };
     case "menuFail":
       return {
-        headline: "사장님 매장 메뉴가 일반 DB에 없는 특수 메뉴로 분류됩니다.",
+        headline: `${place}의 메뉴가 일반 DB에 없는 특수 메뉴로 분류됩니다.`,
         body: "정확한 진단을 위해 메뉴를 직접 입력하시거나\n전문가 분석을 받으시기를 권장드립니다.",
         showLoss: false,
       };
     case "fallback":
       return {
-        headline: "주소 인식이 어려워 정밀 분석이 필요한 상태입니다.",
-        body: "사장님 매장의 정확한 상권 분석을 위해\n무료 컨설팅을 권장드립니다.",
+        headline: `${place}의 주소 인식이 어려워 정밀 분석이 필요합니다.`,
+        body: "정확한 상권 분석을 위해\n무료 컨설팅을 권장드립니다.",
         showLoss: false,
       };
   }
+}
+
+/** 손실 박스 헤딩 — 시군구 개인화 */
+export function lossBoxHeading(sigungu: string | null): string {
+  if (sigungu) {
+    return `${sigungu}에서 매년 놓치고 있는 매출  (보수적 추정)`;
+  }
+  return "연 잠재 매출 손실  (보수적 추정)";
 }
 
 // ===================
