@@ -10,11 +10,15 @@ import {
   ExternalLink,
   AlertCircle,
   Sparkles,
+  FileText,
+  Lock,
+  Download,
 } from "lucide-react";
 import { db, schema } from "@/lib/db";
 import type { AnalysisResult } from "@/lib/types/scoring";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
 import { ScoreGauge } from "./ScoreGauge";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -51,13 +55,17 @@ export default async function ResultPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const rows = await db
-    .select()
-    .from(schema.analyses)
-    .where(eq(schema.analyses.id, id))
-    .limit(1);
+  const [rows, session] = await Promise.all([
+    db
+      .select()
+      .from(schema.analyses)
+      .where(eq(schema.analyses.id, id))
+      .limit(1),
+    auth(),
+  ]);
   const row = rows[0];
   if (!row) notFound();
+  const isMember = !!session?.user;
 
   const data = row.reportData as ReportData;
   const { place, result } = data;
@@ -236,6 +244,9 @@ export default async function ResultPage({
         </div>
       </section>
 
+      {/* PDF 보고서 잠금 / 다운로드 카드 */}
+      <PdfReportCard isMember={isMember} analysisId={id} placeName={place.name} />
+
       {/* 상담 권장 카드 */}
       {consultation.recommended && (
         <section className="mt-10 rounded-2xl border border-primary/40 bg-primary/[0.04] p-6 md:p-8">
@@ -397,4 +408,97 @@ function scoreColor(score: number): string {
   if (score >= 60) return "text-primary";
   if (score >= 40) return "text-amber-500";
   return "text-rose-500";
+}
+
+function PdfReportCard({
+  isMember,
+  analysisId,
+  placeName,
+}: {
+  isMember: boolean;
+  analysisId: string;
+  placeName: string;
+}) {
+  return (
+    <section className="relative mt-10 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/[0.08] via-background to-background p-6 md:p-8">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/15 blur-3xl" />
+
+      <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        {/* 좌측: 미리보기 카드 (블러) */}
+        <div className="flex items-start gap-4">
+          <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-md border border-border/40 bg-background/60">
+            <div className="absolute inset-0 flex flex-col items-stretch gap-1 p-2">
+              <div className="h-1.5 w-3/4 rounded-full bg-primary/40" />
+              <div className="h-1 w-full rounded-full bg-muted-foreground/30" />
+              <div className="h-1 w-5/6 rounded-full bg-muted-foreground/30" />
+              <div className="mt-1 h-6 w-full rounded bg-primary/20" />
+              <div className="h-1 w-2/3 rounded-full bg-muted-foreground/30" />
+              <div className="h-1 w-full rounded-full bg-muted-foreground/30" />
+            </div>
+            <div
+              className={`absolute inset-0 backdrop-blur-[2px] ${
+                isMember ? "" : "bg-background/30"
+              }`}
+            />
+            {!isMember && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              <h3 className="font-heading text-lg font-bold md:text-xl">
+                상세 분석 보고서 PDF
+              </h3>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {placeName} 진단 결과를 한 장 보고서로 받아보실 수 있어요.
+              <br />
+              직원·파트너와 공유, 회의 자료로 활용하기 좋아요.
+            </p>
+            <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/80">
+              <li>· 점수 + 결론 한 장 요약</li>
+              <li>· 메뉴 매칭 상세표</li>
+              <li>· 손실 격차 시각화</li>
+              <li>· 개선 액션 가이드</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* 우측: 버튼 */}
+        <div className="flex shrink-0 flex-col items-stretch gap-2 md:items-end">
+          {isMember ? (
+            <>
+              <a
+                href={`/api/analyze/${analysisId}/pdf`}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                <Download className="h-4 w-4" />
+                PDF 다운로드
+              </a>
+              <p className="text-center text-[11px] text-muted-foreground/70 md:text-right">
+                준비 중인 기능이에요
+              </p>
+            </>
+          ) : (
+            <>
+              <Link
+                href={`/login?callbackUrl=/analyze/result/${analysisId}`}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                <Lock className="h-4 w-4" />
+                3초 가입하고 PDF 받기
+              </Link>
+              <p className="text-center text-[11px] text-muted-foreground/70 md:text-right">
+                카카오 · 이메일 가입 · 가입 즉시 무제한 분석
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 const ROTATING_VERBS = ["고르고", "결제하고", "방문하고"];
 const META = [
@@ -101,22 +101,26 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.55 }}
-          className="mt-8 flex flex-wrap items-center gap-4"
+          className="mt-10 flex flex-col items-start gap-4 md:flex-row md:items-center"
         >
           <Link
-            href="/work"
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            href="/analyze"
+            className="group inline-flex h-14 items-center gap-2.5 rounded-full bg-primary px-7 text-base font-bold text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-90 md:h-16 md:px-9 md:text-lg"
           >
-            성공 사례 보기
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Sparkles className="h-5 w-5" />
+            무료 상권 분석하기
+            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-full border border-foreground/20 px-6 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
+            className="inline-flex h-12 items-center gap-2 rounded-full border border-foreground/20 px-5 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary md:h-14 md:px-6"
           >
             상담 신청
           </Link>
         </motion.div>
+        <p className="mt-3 text-xs text-muted-foreground/70">
+          회원가입 없이 3회까지 무료 · 네이버 플레이스 URL만 있으면 1분 만에 진단
+        </p>
 
         {/* 하단 메타 */}
         <motion.div
