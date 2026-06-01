@@ -42,9 +42,8 @@ export function PdfPage1({
 
   return (
     <Page size="A4" style={styles.page}>
-      {/* ===== 배경 이미지 (명동 골목, 흑백, opacity 0.15) ===== */}
       <BackgroundImage />
-
+      <View style={styles.pageInner}>
       {/* ===== 상단 헤더 ===== */}
       <View
         style={{
@@ -322,6 +321,7 @@ export function PdfPage1({
         <DataCard big="70%" small="디엔핑 사용률" note="외식 검색 1위" />
         <DataCard big="1,012" small="USD 1인 평균지출" note="한국관광공사 2025" />
       </View>
+      </View>{/* /pageInner */}
 
       {/* ===== 푸터 ===== */}
       <View style={styles.footer}>

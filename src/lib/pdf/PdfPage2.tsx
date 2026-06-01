@@ -2,6 +2,7 @@
 import { Page, View, Text } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing, gradeColor } from "./styles";
 import { page2GapLine, lossBoxHeading, type Scenario } from "./scenario";
+import { BackgroundImage } from "./BackgroundImage";
 import {
   formatLossKRW,
   type LossEstimate,
@@ -57,6 +58,8 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
 
   return (
     <Page size="A4" style={styles.page}>
+      <BackgroundImage />
+      <View style={styles.pageInner}>
       {/* 상단 */}
       <View
         style={{
@@ -279,6 +282,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
           </Text>
         </View>
       )}
+      </View>{/* /pageInner */}
 
       <View style={styles.footer}>
         <Text>

@@ -43,17 +43,20 @@ export const fontSize = {
 };
 
 export const styles = StyleSheet.create({
-  // 페이지
+  // 페이지 — 패딩 0 (배경 이미지 풀브리드용), 콘텐츠는 pageInner 에 패딩
   page: {
     fontFamily: "Pretendard",
     fontSize: fontSize.base,
     color: colors.text,
     backgroundColor: colors.bg,
-    padding: 36,
+    padding: 0,
     lineHeight: 1.5,
   },
   pageInner: {
     flex: 1,
+    paddingHorizontal: 36,
+    paddingTop: 36,
+    paddingBottom: 60, // footer 영역 확보
   },
 
   // 타이포

@@ -2,6 +2,7 @@
 import { Page, View, Text } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing } from "./styles";
 import { page3Stage, type Scenario } from "./scenario";
+import { BackgroundImage } from "./BackgroundImage";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
 
 interface Props {
@@ -21,6 +22,8 @@ export function PdfPage3({
 
   return (
     <Page size="A4" style={styles.page}>
+      <BackgroundImage />
+      <View style={styles.pageInner}>
       {/* 상단 */}
       <View
         style={{
@@ -199,6 +202,7 @@ export function PdfPage3({
           ★ 메이투안 본사 정식 인증 대행사  ·  12,400개 매장의 따종디엔핑 광고 운영 중
         </Text>
       </View>
+      </View>{/* /pageInner */}
 
       <View style={styles.footer}>
         <Text>퍼플페퍼 · 중국 인바운드 마케팅 공식 대행사</Text>
