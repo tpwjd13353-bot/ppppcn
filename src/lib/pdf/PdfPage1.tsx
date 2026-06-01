@@ -316,8 +316,8 @@ export function PdfPage1({
           }
           small={
             sigungu
-              ? `${sigungu} 연 방문 중국인 관광객`
-              : "연 방문 중국인 관광객"
+              ? `${sigungu} 연 방문 중국 관광객`
+              : "연 방문 중국 관광객"
           }
           note={sigungu ? `전국 ${loss?.nationalRank}위` : ""}
           highlight
