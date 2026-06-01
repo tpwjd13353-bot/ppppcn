@@ -53,17 +53,32 @@ export interface SanggwonItem {
   note: string;
 }
 
+// 시군구별 외국인·중국인 관광 통계 (한국관광공사 기반)
+export interface RegionStatsItem {
+  sido: string;
+  sigungu: string;
+  annualForeignVisitors: number;        // 연간 외국인 방문수
+  chineseRatioPct: number;              // 외국인 중 중국인 비중 (%)
+  annualChineseVisitors: number;        // 연간 중국인 추정
+  monthlyChineseVisitors: number;       // 월간 중국인 추정
+  nationalRank: number;                 // 전국 외국인 방문 시군구 순위
+  cardSpendShareInSido: number;         // 시도 내 외국인 카드 소비 비중 (%)
+  note: string;
+}
+
 export interface ScoreData {
   menus: MenuItem[];
   sidos: SidoItem[];
   sigungus: SigunguItem[];
   sanggwons: SanggwonItem[];
+  regionStats: RegionStatsItem[];
 
   // 빠른 조회용 인덱스
   menuByName: Map<string, MenuItem>;
   sidoByName: Map<string, SidoItem>;
   sigunguByKey: Map<string, SigunguItem>; // key = `${sido}|${name}`
   sanggwonByName: Map<string, SanggwonItem>;
+  regionStatsByKey: Map<string, RegionStatsItem>; // key = `${sido}|${sigungu}`
 
   loadedAt: Date;
 }
@@ -169,15 +184,36 @@ function load(): ScoreData {
     };
   });
 
+  const regionStats = readCsv<RegionStatsItem>("region_stats.csv", (r) => {
+    const sido = r["시도"];
+    const sigungu = r["시군구"];
+    if (!sido || !sigungu) return null;
+    return {
+      sido,
+      sigungu,
+      annualForeignVisitors: Number(r["연간외국인방문수"] ?? 0),
+      chineseRatioPct: Number(r["중국인비중"] ?? 0),
+      annualChineseVisitors: Number(r["연간중국인추정"] ?? 0),
+      monthlyChineseVisitors: Number(r["월간중국인추정"] ?? 0),
+      nationalRank: Number(r["전국방문순위"] ?? 0),
+      cardSpendShareInSido: Number(r["외국인카드소비비중"] ?? 0),
+      note: r["비고"] ?? "",
+    };
+  });
+
   return {
     menus,
     sidos,
     sigungus,
     sanggwons,
+    regionStats,
     menuByName: new Map(menus.map((m) => [m.name, m])),
     sidoByName: new Map(sidos.map((s) => [s.name, s])),
     sigunguByKey: new Map(sigungus.map((s) => [`${s.sido}|${s.name}`, s])),
     sanggwonByName: new Map(sanggwons.map((s) => [s.name, s])),
+    regionStatsByKey: new Map(
+      regionStats.map((s) => [`${s.sido}|${s.sigungu}`, s]),
+    ),
     loadedAt: new Date(),
   };
 }
