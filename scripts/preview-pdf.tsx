@@ -12,11 +12,16 @@ import type { AnalysisResult } from "@/lib/types/scoring";
 
 registerPdfFonts();
 
+// 인자: npx tsx scripts/preview-pdf.tsx [sido] [sigungu]
+// 기본: 부산광역시 부산진구
+const argSido = process.argv[2] ?? "부산광역시";
+const argSigungu = process.argv[3] ?? "부산진구";
+
 const place: NaverPlaceData = {
   placeId: "sample",
-  name: "샘플식당 종로점",
-  address: "서울특별시 종로구 인사동길 10",
-  roadAddress: "서울특별시 종로구 인사동길 10",
+  name: `샘플식당 ${argSigungu}점`,
+  address: `${argSido} ${argSigungu} 중앙대로 100`,
+  roadAddress: `${argSido} ${argSigungu} 중앙대로 100`,
   category: "한식 / 고깃집",
   menus: [
     "고추장삼겹살",
@@ -39,7 +44,7 @@ const result: AnalysisResult = {
   details: {
     region: {
       score: 90,
-      match: { matched: true, tier: "상권", matchedName: "인사동" },
+      match: { matched: true, tier: "시군구", matchedName: argSigungu },
       needsConsultation: false,
     },
     menu: {
@@ -61,7 +66,7 @@ const result: AnalysisResult = {
   consultation: { recommended: true, reasons: ["마케팅 약점"], priority: "high" },
 };
 
-const loss = estimateLoss("서울특별시", "종로구");
+const loss = estimateLoss(argSido, argSigungu);
 
 async function main() {
   const doc = PdfReport({
