@@ -4,7 +4,7 @@ import { auth, signIn } from "@/lib/auth";
 
 export const metadata = {
   title: "로그인 — 퍼플페퍼",
-  description: "카카오 계정으로 빠르게 시작하세요.",
+  description: "카카오 또는 이메일로 시작하세요.",
 };
 
 export default async function LoginPage({
@@ -14,7 +14,6 @@ export default async function LoginPage({
 }) {
   const session = await auth();
   const { callbackUrl } = await searchParams;
-  // 가입 직후엔 무조건 /onboarding 거치게 (프로필 완성됐으면 즉시 메인으로 빠짐)
   const redirectTo = callbackUrl ?? "/onboarding";
 
   if (session?.user) redirect(redirectTo);
@@ -26,9 +25,10 @@ export default async function LoginPage({
           로그인 / 가입
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          카카오 계정으로 3초 안에 시작할 수 있어요. 별도 가입 절차는 없습니다.
+          처음이면 자동으로 가입돼요. 별도 절차 없습니다.
         </p>
 
+        {/* 카카오 로그인 */}
         <form
           action={async () => {
             "use server";
@@ -42,6 +42,41 @@ export default async function LoginPage({
           >
             <KakaoIcon />
             카카오로 시작하기
+          </button>
+        </form>
+
+        {/* 구분선 */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border/40" />
+          <span className="font-body-en text-[10px] uppercase tracking-wider text-muted-foreground/60">
+            or
+          </span>
+          <div className="h-px flex-1 bg-border/40" />
+        </div>
+
+        {/* 이메일 매직 링크 */}
+        <form
+          action={async (formData: FormData) => {
+            "use server";
+            await signIn("resend", {
+              email: formData.get("email"),
+              redirectTo,
+            });
+          }}
+          className="space-y-3"
+        >
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder="이메일 주소"
+            className="w-full rounded-md border border-border/50 bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="inline-flex h-12 w-full items-center justify-center rounded-full border border-foreground/20 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
+          >
+            이메일로 로그인 링크 받기
           </button>
         </form>
 
