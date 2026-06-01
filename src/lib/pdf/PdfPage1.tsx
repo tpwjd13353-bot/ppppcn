@@ -1,5 +1,6 @@
-// 1페이지 — 표지 / 핵심 요약 (개인화 + 데이터 풍부 + 시급성)
-import { Page, View, Text } from "@react-pdf/renderer";
+// 1페이지 — 표지 / 핵심 요약 (개인화 + 데이터 풍부 + 시급성 + 배경 이미지)
+import path from "node:path";
+import { Page, View, Text, Image } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing } from "./styles";
 import { page1Conclusion, lossBoxHeading, type Scenario } from "./scenario";
 import {
@@ -8,6 +9,8 @@ import {
 } from "@/lib/analyze/lossEstimate";
 import type { AnalysisResult } from "@/lib/types/scoring";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
+
+const BG_IMAGE = path.join(process.cwd(), "public/images/page1-bg.jpg");
 
 interface Props {
   place: NaverPlaceData;
@@ -41,6 +44,21 @@ export function PdfPage1({
 
   return (
     <Page size="A4" style={styles.page}>
+      {/* ===== 배경 이미지 (먹자골목 + 관광객, 흑백, 매우 투명) ===== */}
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.08,
+          overflow: "hidden",
+        }}
+      >
+        <Image src={BG_IMAGE} style={{ width: "100%", height: "100%" }} />
+      </View>
+
       {/* ===== 상단 헤더 ===== */}
       <View
         style={{
