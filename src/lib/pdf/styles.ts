@@ -155,15 +155,35 @@ export const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   scoreValue: {
-    fontSize: 48,
+    fontSize: 40,
     fontWeight: 700,
-    marginTop: spacing.sm,
     color: colors.text,
+    lineHeight: 1.1,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   scoreSubtitle: {
     fontSize: fontSize.xs,
     color: colors.textMuted,
-    marginTop: spacing.xs,
+  },
+
+  // 섹션 헤더 (좌측 컬러바 + 제목)
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  sectionBar: {
+    width: 3,
+    height: 14,
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+  },
+  sectionTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: 700,
+    lineHeight: 1.2,
   },
 
   // 표

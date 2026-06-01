@@ -29,25 +29,22 @@ export function PdfPage3({
           alignItems: "baseline",
         }}
       >
-        <Text
-          style={{
-            fontSize: fontSize.md,
-            fontWeight: 700,
-          }}
-        >
+        <Text style={{ fontSize: fontSize.md, fontWeight: 700, lineHeight: 1.2 }}>
           {place.name}
         </Text>
-        <Text style={styles.pageTitle}>03 처방 / 액션 가이드</Text>
+        <Text style={[styles.pageTitle, { lineHeight: 1.2 }]}>
+          03 처방 / 액션 가이드
+        </Text>
       </View>
       <View style={styles.divider} />
 
       {/* ===== A. 현재 단계 ===== */}
-      <SectionHeader icon="🎯" title="현재 단계 진단" />
+      <SectionHeader title="현재 단계 진단" />
       <View
         style={[
           styles.card,
           styles.cardPrimary,
-          { marginTop: spacing.md, padding: spacing.lg },
+          { marginTop: spacing.xs, padding: spacing.md },
         ]}
       >
         <Text
@@ -56,30 +53,31 @@ export function PdfPage3({
             color: colors.primary,
             fontWeight: 700,
             letterSpacing: 1,
+            lineHeight: 1.2,
           }}
         >
           [ {stage.label} ]
         </Text>
         <Text
           style={{
-            fontSize: fontSize.md,
-            marginTop: spacing.sm,
+            fontSize: fontSize.sm,
+            marginTop: 6,
             lineHeight: 1.6,
+            color: colors.text,
           }}
         >
           {stage.body}
         </Text>
       </View>
 
-      <View style={{ height: spacing.lg }} />
-
       {/* ===== B. 우선순위 채널 ===== */}
-      <SectionHeader icon="🚦" title="우선순위 채널" />
+      <View style={{ height: spacing.md }} />
+      <SectionHeader title="우선순위 채널" />
       <View
         style={{
           flexDirection: "row",
           gap: spacing.sm,
-          marginTop: spacing.md,
+          marginTop: spacing.xs,
         }}
       >
         <ChannelCard
@@ -116,11 +114,10 @@ export function PdfPage3({
         />
       </View>
 
-      <View style={{ height: spacing.lg }} />
-
       {/* ===== C. 첫 30일 액션 플랜 ===== */}
-      <SectionHeader icon="📅" title="첫 30일 액션 플랜" />
-      <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+      <View style={{ height: spacing.md }} />
+      <SectionHeader title="첫 30일 액션 플랜" />
+      <View style={{ marginTop: spacing.xs, gap: 6 }}>
         <WeekRow
           week="Week 1"
           title="매장 정보 등록"
@@ -143,14 +140,13 @@ export function PdfPage3({
         />
       </View>
 
-      <View style={{ height: spacing.lg }} />
-
       {/* ===== D. 무료 상담 CTA ===== */}
+      <View style={{ height: spacing.md }} />
       <View
         style={[
           styles.card,
           styles.cardPrimary,
-          { padding: spacing.lg },
+          { padding: spacing.md },
         ]}
       >
         <Text
@@ -158,14 +154,15 @@ export function PdfPage3({
             fontSize: fontSize.lg,
             fontWeight: 700,
             color: colors.primary,
+            lineHeight: 1.2,
           }}
         >
-          💬 무료 상담
+          무료 상담
         </Text>
         <Text
           style={{
-            fontSize: fontSize.md,
-            marginTop: spacing.sm,
+            fontSize: fontSize.sm,
+            marginTop: 4,
             color: colors.text,
             lineHeight: 1.5,
           }}
@@ -174,16 +171,14 @@ export function PdfPage3({
           구체적으로 알려드립니다.
         </Text>
 
-        <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+        <View style={{ marginTop: spacing.sm, gap: 6 }}>
           <CTAButton
             primary
-            icon="💬"
             label="카톡으로 상담 신청"
             sub="(가장 빠른 응답 · 부담 없음)"
             href={contactKakao}
           />
           <CTAButton
-            icon="☎"
             label={`전화 상담  ${contactPhone}`}
             sub="(즉시 응답 · 평일 10~19시)"
             href={`tel:${contactPhone.replace(/[^0-9]/g, "")}`}
@@ -194,8 +189,8 @@ export function PdfPage3({
           style={{
             fontSize: fontSize.xs,
             color: colors.textMuted,
-            marginTop: spacing.md,
-            paddingTop: spacing.sm,
+            marginTop: spacing.sm,
+            paddingTop: 6,
             borderTopWidth: 0.4,
             borderTopColor: colors.primary,
             lineHeight: 1.5,
@@ -213,13 +208,11 @@ export function PdfPage3({
   );
 }
 
-function SectionHeader({ icon, title }: { icon: string; title: string }) {
+function SectionHeader({ title }: { title: string }) {
   return (
-    <View
-      style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}
-    >
-      <Text style={{ fontSize: fontSize.md }}>{icon}</Text>
-      <Text style={{ fontSize: fontSize.lg, fontWeight: 700 }}>{title}</Text>
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionBar} />
+      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 }
@@ -243,7 +236,7 @@ function ChannelCard({
       style={[
         styles.card,
         isPrimary ? styles.cardPrimary : styles.cardSurface,
-        { flex: 1, padding: spacing.md },
+        { flex: 1, padding: spacing.sm },
       ]}
     >
       <Text
@@ -252,6 +245,7 @@ function ChannelCard({
           color: isPrimary ? colors.primary : colors.textMuted,
           fontWeight: 700,
           letterSpacing: 1,
+          lineHeight: 1.2,
         }}
       >
         {rank}
@@ -261,6 +255,7 @@ function ChannelCard({
           fontSize: fontSize.md,
           fontWeight: 700,
           marginTop: 2,
+          lineHeight: 1.3,
         }}
       >
         {name}
@@ -271,11 +266,12 @@ function ChannelCard({
           color: isPrimary ? colors.primary : colors.textMuted,
           marginTop: 2,
           fontWeight: 600,
+          lineHeight: 1.3,
         }}
       >
         {badge}
       </Text>
-      <View style={{ marginTop: spacing.sm, gap: 3 }}>
+      <View style={{ marginTop: 6, gap: 2 }}>
         {bullets.map((b, i) => (
           <Text
             key={i}
@@ -306,28 +302,31 @@ function WeekRow({
     <View
       style={{
         flexDirection: "row",
-        gap: spacing.md,
+        gap: spacing.sm,
         alignItems: "flex-start",
       }}
     >
       <Text
         style={{
-          width: 60,
+          width: 56,
           fontSize: fontSize.sm,
           fontWeight: 700,
           color: colors.primary,
+          lineHeight: 1.4,
         }}
       >
         {week} ▶
       </Text>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: fontSize.md, fontWeight: 600 }}>{title}</Text>
+        <Text style={{ fontSize: fontSize.sm, fontWeight: 600, lineHeight: 1.4 }}>
+          {title}
+        </Text>
         <Text
           style={{
             fontSize: fontSize.xs,
             color: colors.textMuted,
-            marginTop: 2,
-            lineHeight: 1.5,
+            marginTop: 1,
+            lineHeight: 1.45,
           }}
         >
           {body}
@@ -338,13 +337,11 @@ function WeekRow({
 }
 
 function CTAButton({
-  icon,
   label,
   sub,
   href,
   primary,
 }: {
-  icon: string;
   label: string;
   sub: string;
   href: string;
@@ -357,23 +354,25 @@ function CTAButton({
         primary
           ? { backgroundColor: colors.primary, borderColor: colors.primary }
           : styles.cardSurface,
-        { padding: spacing.md },
+        { padding: spacing.sm },
       ]}
     >
       <Text
         style={{
-          fontSize: fontSize.md,
+          fontSize: fontSize.sm,
           fontWeight: 700,
           color: primary ? "#FFFFFF" : colors.text,
+          lineHeight: 1.3,
         }}
       >
-        {icon}  {label}
+        {label}
       </Text>
       <Text
         style={{
           fontSize: fontSize.xs,
           color: primary ? "#E5DEFF" : colors.textMuted,
           marginTop: 2,
+          lineHeight: 1.3,
         }}
       >
         {sub}  →  {href}

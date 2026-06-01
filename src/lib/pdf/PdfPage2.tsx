@@ -1,4 +1,4 @@
-// 2페이지 — 상세 진단 (지역·메뉴·격차)
+// 2페이지 — 상세 진단
 import { Page, View, Text } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing, gradeColor } from "./styles";
 import { page2GapLine, type Scenario } from "./scenario";
@@ -16,7 +16,6 @@ interface Props {
   loss: LossEstimate | null;
 }
 
-// 분류별 가중치 (분포 막대 정렬용)
 const CATEGORY_ORDER: { key: string; label: string; score: number }[] = [
   { key: "절대선호", label: "절대선호", score: 100 },
   { key: "매우선호", label: "매우선호", score: 90 },
@@ -30,12 +29,13 @@ const CATEGORY_ORDER: { key: string; label: string; score: number }[] = [
   { key: "절대비선호", label: "절대비선호", score: 10 },
 ];
 
+const TABLE_LIMIT = 6;
+
 export function PdfPage2({ place, result, scenario, loss }: Props) {
   const { store, marketing, details } = result;
   const { region, menu } = details;
   const gap = store.score - marketing.score;
 
-  // 분류별 카운트
   const categoryCounts = new Map<string, number>();
   for (const m of menu.matches) {
     if (m.matched && m.분류) {
@@ -48,16 +48,13 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
     menu.unmatchedCount,
   );
 
-  // 표 상위 8개 — 매칭된 것 점수 높은 순
   const tableRows = [...menu.matches]
     .sort((a, b) => {
       if (a.matched && !b.matched) return -1;
       if (!a.matched && b.matched) return 1;
       return (b.score ?? 0) - (a.score ?? 0);
     })
-    .slice(0, 8);
-
-  const tier = region.match.tier;
+    .slice(0, TABLE_LIMIT);
 
   return (
     <Page size="A4" style={styles.page}>
@@ -73,28 +70,28 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
           style={{
             fontSize: fontSize.md,
             fontWeight: 700,
-            color: colors.text,
+            lineHeight: 1.2,
           }}
         >
           {place.name}
         </Text>
-        <Text style={styles.pageTitle}>02 상세 진단</Text>
+        <Text style={[styles.pageTitle, { lineHeight: 1.2 }]}>02 상세 진단</Text>
       </View>
       <View style={styles.divider} />
 
       {/* ===== A. 지역 분석 ===== */}
-      <SectionHeader icon="📍" title="지역 분석" />
+      <SectionHeader title="지역 분석" />
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "baseline",
-          marginTop: spacing.sm,
+          marginTop: spacing.xs,
         }}
       >
-        <Text style={{ fontSize: fontSize.md, fontWeight: 600 }}>
+        <Text style={{ fontSize: fontSize.md, fontWeight: 600, lineHeight: 1.2 }}>
           {region.match.matchedName
-            ? `${region.match.matchedName} (${tier})`
+            ? `${region.match.matchedName} (${region.match.tier})`
             : "매칭 정보 없음"}
         </Text>
         <Text
@@ -102,6 +99,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
             fontSize: fontSize.xl,
             fontWeight: 700,
             color: gradeColor(region.score),
+            lineHeight: 1.2,
           }}
         >
           {region.score}점
@@ -109,7 +107,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       </View>
 
       {loss && (
-        <View style={{ marginTop: spacing.md, gap: 4 }}>
+        <View style={{ marginTop: spacing.sm, gap: 4 }}>
           <Bullet
             text={`전국 외국인 방문 시군구 ${loss.nationalRank}위`}
             sub="한국관광공사 2025 통계"
@@ -120,7 +118,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
           />
           <Bullet
             text={`월 중국인 방문객 ${loss.monthlyChineseVisitors.toLocaleString()}명  ·  연 ${loss.annualChineseVisitors.toLocaleString()}명`}
-            sub="한국관광공사 2025 + 자체 추정"
+            sub="한국관광공사 2025"
           />
         </View>
       )}
@@ -128,12 +126,13 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       <View style={styles.divider} />
 
       {/* ===== B. 메뉴 분석 ===== */}
-      <SectionHeader icon="🍽" title="메뉴 분석" />
+      <SectionHeader title="메뉴 분석" />
       <Text
         style={{
           fontSize: fontSize.sm,
           color: colors.textMuted,
-          marginTop: 4,
+          marginTop: 2,
+          lineHeight: 1.4,
         }}
       >
         입력 메뉴 {menu.matches.length}개  ·  DB 매칭 {menu.matchedCount}개
@@ -141,7 +140,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       </Text>
 
       {/* 분류 분포 */}
-      <View style={{ marginTop: spacing.md, gap: 4 }}>
+      <View style={{ marginTop: spacing.sm, gap: 3 }}>
         {CATEGORY_ORDER.map(({ key, label, score }) => {
           const count = categoryCounts.get(key) ?? 0;
           if (count === 0) return null;
@@ -168,7 +167,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       </View>
 
       {/* 매칭 표 */}
-      <View style={{ marginTop: spacing.lg }}>
+      <View style={{ marginTop: spacing.md }}>
         <View style={styles.tableHeader}>
           <Text
             style={[
@@ -189,7 +188,12 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
           <Text
             style={[
               styles.tableCell,
-              { flex: 0.7, fontWeight: 600, color: colors.textMuted, textAlign: "right" },
+              {
+                flex: 0.7,
+                fontWeight: 600,
+                color: colors.textMuted,
+                textAlign: "right",
+              },
             ]}
           >
             점수
@@ -206,16 +210,17 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
         {tableRows.map((m, i) => (
           <MenuTableRow key={i} m={m} />
         ))}
-        {menu.matches.length > 8 && (
+        {menu.matches.length > TABLE_LIMIT && (
           <Text
             style={{
               fontSize: fontSize.xs,
               color: colors.textLight,
               textAlign: "right",
               marginTop: 4,
+              lineHeight: 1.2,
             }}
           >
-            ... 외 {menu.matches.length - 8}개
+            ... 외 {menu.matches.length - TABLE_LIMIT}개
           </Text>
         )}
       </View>
@@ -223,19 +228,19 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
       <View style={styles.divider} />
 
       {/* ===== C. 손실 격차 ===== */}
-      <SectionHeader icon="📊" title="손실 격차" />
-      <View style={{ marginTop: spacing.md }}>
+      <SectionHeader title="손실 격차" />
+      <View style={{ marginTop: spacing.sm }}>
         <Bar label="상권" value={store.score} color={colors.primary} />
-        <View style={{ height: 6 }} />
+        <View style={{ height: 5 }} />
         <Bar label="마케팅" value={marketing.score} color={colors.danger} />
       </View>
       <Text
         style={{
-          marginTop: spacing.md,
-          fontSize: fontSize.md,
+          marginTop: spacing.sm,
+          fontSize: fontSize.sm,
           color: colors.text,
           fontWeight: 600,
-          lineHeight: 1.5,
+          lineHeight: 1.55,
         }}
       >
         ▶ {page2GapLine(scenario)}
@@ -246,7 +251,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
           style={[
             styles.card,
             styles.cardWarning,
-            { marginTop: spacing.md, padding: spacing.md },
+            { marginTop: spacing.sm, padding: spacing.md },
           ]}
         >
           <Text
@@ -254,16 +259,18 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
               fontSize: fontSize.xs,
               color: colors.textMuted,
               letterSpacing: 0.8,
+              lineHeight: 1.2,
             }}
           >
-            연 잠재 매출 손실 (보수적 추정)
+            연 잠재 매출 손실  (보수적 추정)
           </Text>
           <Text
             style={{
-              fontSize: fontSize.xl,
+              fontSize: fontSize.lg,
               fontWeight: 700,
               color: colors.danger,
-              marginTop: 2,
+              marginTop: 4,
+              lineHeight: 1.2,
             }}
           >
             {formatLossKRW(loss.annualLossKRWLow)} ~{" "}
@@ -274,7 +281,7 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
 
       <View style={styles.footer}>
         <Text>
-          {place.name}  ·  상권 종합 {store.score}({store.grade}) / 마케팅{" "}
+          {place.name}  ·  상권 {store.score}({store.grade}) / 마케팅{" "}
           {marketing.score}({marketing.grade}) / 격차 {gap}
         </Text>
         <Text>2 / 3</Text>
@@ -283,13 +290,11 @@ export function PdfPage2({ place, result, scenario, loss }: Props) {
   );
 }
 
-function SectionHeader({ icon, title }: { icon: string; title: string }) {
+function SectionHeader({ title }: { title: string }) {
   return (
-    <View
-      style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}
-    >
-      <Text style={{ fontSize: fontSize.md }}>{icon}</Text>
-      <Text style={{ fontSize: fontSize.lg, fontWeight: 700 }}>{title}</Text>
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionBar} />
+      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 }
@@ -297,15 +302,28 @@ function SectionHeader({ icon, title }: { icon: string; title: string }) {
 function Bullet({ text, sub }: { text: string; sub?: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 6 }}>
-      <Text style={{ color: colors.primary, fontWeight: 700 }}>▪</Text>
+      <Text
+        style={{
+          color: colors.primary,
+          fontWeight: 700,
+          lineHeight: 1.4,
+        }}
+      >
+        ▪
+      </Text>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: fontSize.md, color: colors.text }}>{text}</Text>
+        <Text
+          style={{ fontSize: fontSize.sm, color: colors.text, lineHeight: 1.4 }}
+        >
+          {text}
+        </Text>
         {sub && (
           <Text
             style={{
               fontSize: fontSize.xs,
               color: colors.textLight,
               marginTop: 1,
+              lineHeight: 1.3,
             }}
           >
             ↑ {sub}
@@ -336,9 +354,10 @@ function DistroBar({
     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
       <Text
         style={{
-          width: 64,
+          width: 62,
           fontSize: fontSize.xs,
           color: colors.textMuted,
+          lineHeight: 1.2,
         }}
       >
         {label}
@@ -346,7 +365,7 @@ function DistroBar({
       <View
         style={{
           flex: 1,
-          height: 10,
+          height: 9,
           backgroundColor: colors.surface,
           borderRadius: 1,
         }}
@@ -354,7 +373,7 @@ function DistroBar({
         <View
           style={{
             width: `${pct}%`,
-            height: 10,
+            height: 9,
             backgroundColor: color,
             borderRadius: 1,
           }}
@@ -362,20 +381,22 @@ function DistroBar({
       </View>
       <Text
         style={{
-          width: 28,
+          width: 26,
           fontSize: fontSize.xs,
           fontWeight: 700,
           textAlign: "right",
+          lineHeight: 1.2,
         }}
       >
         {count}개
       </Text>
       <Text
         style={{
-          width: 40,
+          width: 32,
           fontSize: fontSize.xs,
           color: colors.textLight,
           textAlign: "right",
+          lineHeight: 1.2,
         }}
       >
         {score !== undefined ? `${score}점` : ""}
@@ -386,7 +407,7 @@ function DistroBar({
             fontSize: 7,
             color: colors.warning,
             fontWeight: 700,
-            marginLeft: 4,
+            lineHeight: 1.2,
           }}
         >
           {badge}
@@ -399,11 +420,17 @@ function DistroBar({
 function MenuTableRow({ m }: { m: MenuMatch }) {
   return (
     <View style={styles.tableRow}>
-      <Text style={[styles.tableCell, { flex: 2 }]}>{m.input}</Text>
+      <Text style={[styles.tableCell, { flex: 2, lineHeight: 1.3 }]}>
+        {m.input}
+      </Text>
       <Text
         style={[
           styles.tableCell,
-          { flex: 2, color: m.matched ? colors.text : colors.textLight },
+          {
+            flex: 2,
+            color: m.matched ? colors.text : colors.textLight,
+            lineHeight: 1.3,
+          },
         ]}
       >
         {m.matched ? m.menuName : "—"}
@@ -416,6 +443,7 @@ function MenuTableRow({ m }: { m: MenuMatch }) {
             textAlign: "right",
             fontWeight: 700,
             color: m.matched ? gradeColor(m.score ?? 0) : colors.warning,
+            lineHeight: 1.3,
           },
         ]}
       >
@@ -428,6 +456,7 @@ function MenuTableRow({ m }: { m: MenuMatch }) {
             flex: 1.3,
             fontSize: fontSize.xs,
             color: m.matched ? colors.textMuted : colors.warning,
+            lineHeight: 1.3,
           },
         ]}
       >
@@ -455,6 +484,7 @@ function Bar({
           fontSize: fontSize.sm,
           color: colors.textMuted,
           fontWeight: 600,
+          lineHeight: 1.2,
         }}
       >
         {label}
@@ -462,7 +492,7 @@ function Bar({
       <View
         style={{
           flex: 1,
-          height: 12,
+          height: 11,
           backgroundColor: colors.surface,
           borderRadius: 2,
         }}
@@ -470,7 +500,7 @@ function Bar({
         <View
           style={{
             width: `${pct}%`,
-            height: 12,
+            height: 11,
             backgroundColor: color,
             borderRadius: 2,
           }}
@@ -483,6 +513,7 @@ function Bar({
           fontSize: fontSize.sm,
           fontWeight: 700,
           marginLeft: spacing.sm,
+          lineHeight: 1.2,
         }}
       >
         {value}

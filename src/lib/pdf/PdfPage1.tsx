@@ -44,48 +44,41 @@ export function PdfPage1({
         }}
       >
         <View>
-          <Text style={styles.brand}>PURPLEPEPPER</Text>
+          <Text style={[styles.brand, { lineHeight: 1.2 }]}>PURPLEPEPPER</Text>
           <Text
             style={{
               fontSize: fontSize.lg,
               fontWeight: 700,
-              marginTop: 2,
+              marginTop: 4,
+              lineHeight: 1.2,
             }}
           >
             상권 진단 보고서
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <Text style={styles.badgeOutline}>
-            ★ MEITUAN OFFICIAL PARTNER
+        <View style={{ alignItems: "flex-end" }}>
+          <Text style={styles.badgeOutline}>★ MEITUAN OFFICIAL PARTNER</Text>
+          <Text
+            style={{
+              fontSize: fontSize.xs,
+              color: colors.textMuted,
+              marginTop: 4,
+            }}
+          >
+            메이투안 본사 정식 인증 대행사
           </Text>
         </View>
       </View>
-      <Text
-        style={{
-          fontSize: fontSize.xs,
-          color: colors.textMuted,
-          marginTop: 4,
-          textAlign: "right",
-        }}
-      >
-        메이투안 본사 정식 인증 대행사
-      </Text>
 
       {/* ===== 상호명 정보 ===== */}
-      <View style={{ marginTop: spacing["2xl"] }}>
+      <View style={{ marginTop: spacing.xl }}>
         <Text
           style={{
-            fontSize: 26,
+            fontSize: 24,
             fontWeight: 700,
             color: colors.text,
             letterSpacing: -0.5,
+            lineHeight: 1.3,
           }}
         >
           {place.name}
@@ -94,24 +87,24 @@ export function PdfPage1({
           style={{
             fontSize: fontSize.md,
             color: colors.textMuted,
-            marginTop: spacing.xs,
+            marginTop: spacing.sm,
+            lineHeight: 1.4,
           }}
         >
           {[place.category, place.roadAddress || place.address]
             .filter(Boolean)
             .join("  ·  ")}
         </Text>
-        <View
+        <Text
           style={{
-            flexDirection: "row",
-            marginTop: spacing.sm,
-            gap: spacing.md,
+            fontSize: fontSize.xs,
+            color: colors.textLight,
+            marginTop: spacing.xs,
+            lineHeight: 1.4,
           }}
         >
-          <Text style={styles.caption}>{dateStr} 진단</Text>
-          <Text style={styles.caption}>·</Text>
-          <Text style={styles.caption}>보고서 #{reportShortId}</Text>
-        </View>
+          {dateStr} 진단  ·  보고서 #{reportShortId}
+        </Text>
       </View>
 
       <View style={styles.divider} />
@@ -135,7 +128,7 @@ export function PdfPage1({
       </View>
 
       {/* ===== 격차 막대 ===== */}
-      <View style={{ marginTop: spacing.xl }}>
+      <View style={{ marginTop: spacing.lg }}>
         <GapBars storeScore={store.score} marketingScore={marketing.score} />
       </View>
 
@@ -144,7 +137,7 @@ export function PdfPage1({
         style={[
           styles.card,
           styles.cardPrimary,
-          { marginTop: spacing.xl, padding: spacing.lg },
+          { marginTop: spacing.lg, padding: spacing.lg },
         ]}
       >
         <Text
@@ -153,26 +146,28 @@ export function PdfPage1({
             fontWeight: 700,
             color: colors.primary,
             letterSpacing: 1.5,
+            lineHeight: 1.2,
           }}
         >
           분석 요약
         </Text>
         <Text
           style={{
-            fontSize: fontSize.lg,
+            fontSize: fontSize.md,
             fontWeight: 700,
             marginTop: spacing.sm,
-            lineHeight: 1.45,
+            lineHeight: 1.5,
+            color: colors.text,
           }}
         >
           {conclusion.headline}
         </Text>
         <Text
           style={{
-            fontSize: fontSize.md,
+            fontSize: fontSize.base,
             color: colors.textMuted,
-            marginTop: spacing.sm,
-            lineHeight: 1.55,
+            marginTop: spacing.xs,
+            lineHeight: 1.6,
           }}
         >
           {conclusion.body}
@@ -181,11 +176,10 @@ export function PdfPage1({
         {conclusion.showLoss && loss && (
           <View
             style={{
-              marginTop: spacing.lg,
+              marginTop: spacing.md,
               paddingTop: spacing.md,
               borderTopWidth: 0.6,
               borderTopColor: colors.primary,
-              opacity: 0.95,
             }}
           >
             <Text
@@ -193,17 +187,18 @@ export function PdfPage1({
                 fontSize: fontSize.xs,
                 color: colors.textMuted,
                 letterSpacing: 0.8,
+                lineHeight: 1.2,
               }}
             >
-              연 잠재 매출 손실 (보수적 추정)
+              연 잠재 매출 손실  (보수적 추정)
             </Text>
             <Text
               style={{
-                fontSize: fontSize["2xl"],
+                fontSize: 18,
                 fontWeight: 700,
                 color: colors.danger,
-                marginTop: 4,
-                letterSpacing: -0.5,
+                marginTop: 6,
+                lineHeight: 1.2,
               }}
             >
               {formatLossKRW(loss.annualLossKRWLow)} ~{" "}
@@ -222,7 +217,7 @@ export function PdfPage1({
             </Text>
           )}
           <Text style={{ marginTop: 2 }}>
-            출처: 한국관광공사 2025 · 디엔핑 사용률 70% 기반 · 퍼플페퍼 자체 분석
+            출처: 한국관광공사 2025  ·  디엔핑 사용률 70% 기반  ·  퍼플페퍼 자체 분석
           </Text>
         </View>
         <Text>1 / 3</Text>
@@ -291,6 +286,7 @@ function GapBars({
           fontSize: fontSize.sm,
           color: colors.textMuted,
           textAlign: "center",
+          lineHeight: 1.2,
         }}
       >
         ← 격차 {gap}점 →
@@ -317,6 +313,7 @@ function Bar({
           fontSize: fontSize.sm,
           color: colors.textMuted,
           fontWeight: 600,
+          lineHeight: 1.2,
         }}
       >
         {label}
@@ -324,7 +321,7 @@ function Bar({
       <View
         style={{
           flex: 1,
-          height: 14,
+          height: 12,
           backgroundColor: colors.surface,
           borderRadius: 2,
         }}
@@ -332,7 +329,7 @@ function Bar({
         <View
           style={{
             width: `${pct}%`,
-            height: 14,
+            height: 12,
             backgroundColor: color,
             borderRadius: 2,
           }}
@@ -345,6 +342,7 @@ function Bar({
           fontSize: fontSize.sm,
           fontWeight: 700,
           marginLeft: spacing.sm,
+          lineHeight: 1.2,
         }}
       >
         {value}
