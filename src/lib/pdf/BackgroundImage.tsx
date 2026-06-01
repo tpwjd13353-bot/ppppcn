@@ -8,7 +8,7 @@ import path from "node:path";
 import { Image } from "@react-pdf/renderer";
 
 const BG_PATH = path.join(process.cwd(), "public/images/page1-bg.jpg");
-const DEFAULT_OPACITY = 0.15;
+const DEFAULT_OPACITY = 0.12;
 
 export function BackgroundImage({ opacity = DEFAULT_OPACITY }: { opacity?: number }) {
   return (

@@ -384,32 +384,43 @@ function ScoreBox3({
         style={{
           flexDirection: "row",
           alignItems: "flex-end",
-          gap: 6,
-          marginTop: 8,
-          marginBottom: 6,
+          justifyContent: "center",
+          gap: 8,
+          marginTop: 10,
+          marginBottom: 8,
         }}
       >
         <Text
           style={{
-            fontSize: 38,
+            fontSize: 44,
             fontWeight: 700,
             color: accent,
             lineHeight: 1.0,
+            letterSpacing: -1.5,
           }}
         >
           {score === null ? "?" : score}
         </Text>
-        <Text
+        <View
           style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: accent,
-            lineHeight: 1.2,
-            marginBottom: 4,
+            backgroundColor: accent,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+            borderRadius: 4,
+            marginBottom: 6,
           }}
         >
-          {grade}
-        </Text>
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#FFFFFF",
+              lineHeight: 1.2,
+            }}
+          >
+            {grade}
+          </Text>
+        </View>
       </View>
       <Text
         style={{
@@ -435,7 +446,7 @@ function getGradeFromScore(score: number | null): string {
   return "F";
 }
 
-/** 시급성 박스 안 한 줄 */
+/** 시급성 박스 안 한 줄 — 좌측 강조 라인 */
 function UrgencyItem({
   big,
   text,
@@ -446,13 +457,21 @@ function UrgencyItem({
   note?: string;
 }) {
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingLeft: spacing.sm,
+        borderLeftWidth: 2,
+        borderLeftColor: colors.warning,
+      }}
+    >
       <Text
         style={{
-          fontSize: 15,
+          fontSize: 16,
           fontWeight: 700,
           color: colors.warning,
           lineHeight: 1.1,
+          letterSpacing: -0.3,
         }}
       >
         {big}
@@ -483,7 +502,7 @@ function UrgencyItem({
   );
 }
 
-/** 1페이지 하단 통계 데이터 카드 */
+/** 1페이지 하단 통계 데이터 카드 — 좌측 강조 라인 + 카드 톤 */
 function DataCard({
   big,
   small,
@@ -498,21 +517,23 @@ function DataCard({
   return (
     <View
       style={[
-        styles.card,
-        highlight ? styles.cardPrimary : styles.cardSurface,
         {
           flex: 1,
           padding: spacing.sm,
-          alignItems: "center",
+          borderRadius: 6,
+          borderLeftWidth: 3,
+          borderLeftColor: highlight ? colors.primary : colors.borderStrong,
+          backgroundColor: highlight ? colors.primarySofter : colors.surface,
         },
       ]}
     >
       <Text
         style={{
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: 700,
           color: highlight ? colors.primary : colors.text,
           lineHeight: 1.1,
+          letterSpacing: -0.3,
         }}
       >
         {big}
@@ -522,7 +543,6 @@ function DataCard({
           fontSize: fontSize.xs,
           color: colors.text,
           marginTop: 4,
-          textAlign: "center",
           lineHeight: 1.3,
         }}
       >
@@ -534,7 +554,6 @@ function DataCard({
             fontSize: 7,
             color: colors.textLight,
             marginTop: 2,
-            textAlign: "center",
             lineHeight: 1.2,
           }}
         >

@@ -7,17 +7,20 @@ export const colors = {
   surface: "#F7F7F8",
   surfaceMuted: "#FAFAFA",
   text: "#1A1A1F",
-  textMuted: "#6B6B72",
-  textLight: "#9BA0A6",
+  textMuted: "#5B5B62",
+  textLight: "#8B9098",
   primary: "#6B5BFF", // 퍼플페퍼 보라
+  primaryDeep: "#4A3FCC", // 진한 보라 (헤드라인용)
   primarySoft: "#EFECFF",
+  primarySofter: "#F5F3FF", // 더 옅은 보라
   danger: "#E5484D", // 마케팅·위험
-  dangerSoft: "#FCEEEE",
-  warning: "#E08E1D",
-  warningSoft: "#FBF4E5",
-  success: "#3E9B4F",
+  dangerSoft: "#FDEEEE",
+  warning: "#D97706",
+  warningSoft: "#FEF3C7",
+  success: "#16A34A",
+  successSoft: "#DCFCE7",
   border: "#E5E5EA",
-  borderStrong: "#D1D1D7",
+  borderStrong: "#C7C7CC",
 };
 
 export const spacing = {
