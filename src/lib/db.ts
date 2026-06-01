@@ -27,8 +27,16 @@ sqlite.pragma("foreign_keys = ON");
 export const db = drizzle(sqlite, { schema });
 
 // 앱 부팅 시 한 번만 마이그레이션 적용 (Railway 첫 배포 자동 처리)
-if (!globalForSqlite.__migrated) {
-  migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
+// 단, `next build` 페이즈에서는 페이지 분석용 import에 의해 두 번 실행될 수 있어 스킵.
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+if (!isBuildPhase && !globalForSqlite.__migrated) {
+  try {
+    migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
+  } catch (err) {
+    // 이미 적용된 테이블이 있으면 무시 (race condition 대비)
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!/already exists/i.test(msg)) throw err;
+  }
   globalForSqlite.__migrated = true;
 }
 
