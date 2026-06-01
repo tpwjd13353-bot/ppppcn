@@ -29,7 +29,7 @@ export function generateConclusion(
     details.menu.matches.length > 0 &&
     details.menu.unmatchedCount === details.menu.matches.length
   ) {
-    return "입력하신 메뉴가 일반 DB에 없는 특수 메뉴입니다. 정확한 분석을 위해 전문가 상담을 권장드립니다";
+    return "입력하신 메뉴가 일반 DB에 없는 특수 메뉴입니다. 정확한 분석을 위해 전문가 상담 또는 하단에 메뉴 추가 부탁드립니다";
   }
 
   // 3) 정상 - 격차 큰 경우 (영업 핵심)
