@@ -11,6 +11,12 @@ export const users = sqliteTable("user", {
   email: text("email").unique(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
+  // ↓ 가입 후 직접 받는 프로필 정보
+  phone: text("phone"), // 휴대폰 (필수, 가입 후 받음)
+  businessName: text("businessName"), // 상호명 (필수)
+  region: text("region"), // 지역 (선택)
+  industry: text("industry"), // 업종 (선택)
+  placeUrl: text("placeUrl"), // 네이버 플레이스 URL (선택)
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

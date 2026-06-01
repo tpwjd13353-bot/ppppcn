@@ -14,7 +14,8 @@ export default async function LoginPage({
 }) {
   const session = await auth();
   const { callbackUrl } = await searchParams;
-  const redirectTo = callbackUrl ?? "/";
+  // 가입 직후엔 무조건 /onboarding 거치게 (프로필 완성됐으면 즉시 메인으로 빠짐)
+  const redirectTo = callbackUrl ?? "/onboarding";
 
   if (session?.user) redirect(redirectTo);
 
