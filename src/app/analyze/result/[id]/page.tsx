@@ -493,7 +493,7 @@ function PdfReportCard({
                 PDF 다운로드
               </a>
               <p className="text-center text-[11px] text-muted-foreground/70 md:text-right">
-                준비 중인 기능이에요
+                회원 24시간 3회 · 메이투안 인증 보고서
               </p>
             </>
           ) : (
