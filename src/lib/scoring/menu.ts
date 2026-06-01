@@ -1,13 +1,11 @@
 // 메뉴 점수
 //
 // 매칭 방식: 정확 일치 → 부분 일치 (포함 관계)
-// 점수 = (매칭된 점수 합 + 미매칭 * 50) / 전체 개수
-// 매칭 실패 메뉴는 50점(중립)으로 평균에 포함
+// 점수 = 매칭된 메뉴의 평균. 미매칭은 평균에서 제외.
+// 전부 미매칭이면 score = null (UI에서 "?"로 표시)
 
 import { getScoreData } from "@/lib/analyze/scoreData";
 import type { MenuMatch, MenuScore } from "@/lib/types/scoring";
-
-const NEUTRAL_SCORE = 50;
 
 function normalize(s: string): string {
   return s
@@ -64,31 +62,28 @@ export function getMenuScore(menus: string[]): MenuScore {
     return { input: raw, matched: false };
   });
 
-  const matchedCount = matches.filter((m) => m.matched).length;
+  const matched = matches.filter((m) => m.matched);
+  const matchedCount = matched.length;
   const unmatchedCount = matches.length - matchedCount;
 
-  // 점수 평균 — 미매칭은 50점으로 계산에 포함
-  let score: number;
-  if (matches.length === 0) {
-    score = NEUTRAL_SCORE;
-  } else {
-    const sumMatched = matches.reduce((s, m) => s + (m.score ?? 0), 0);
-    const sumUnmatched = unmatchedCount * NEUTRAL_SCORE;
-    score = Math.round((sumMatched + sumUnmatched) / matches.length);
-  }
+  // 점수 평균 — 매칭된 것끼리만 계산. 미매칭은 평균 산정에서 제외.
+  const score =
+    matchedCount > 0
+      ? Math.round(
+          matched.reduce((s, m) => s + (m.score ?? 0), 0) / matchedCount,
+        )
+      : null;
 
-  // 상담 유도: 미매칭 >= 매칭 시
+  // 안내: 미매칭이 있으면 직접 입력 권장
   let needsConsultation = false;
   let consultationReason: string | undefined;
 
-  if (matches.length > 0 && unmatchedCount >= matchedCount) {
+  if (matches.length > 0 && unmatchedCount > 0) {
     needsConsultation = true;
-    if (unmatchedCount === matches.length) {
-      consultationReason =
-        "입력하신 메뉴가 일반 DB에 없는 특수 메뉴입니다. 전문가 분석을 권장드립니다";
-    } else {
-      consultationReason = `${unmatchedCount}개 메뉴는 별도 분석이 필요합니다`;
-    }
+    consultationReason =
+      unmatchedCount === matches.length
+        ? "DB에 없는 메뉴라 분석이 어렵습니다. 정확한 메뉴명을 직접 입력해주세요."
+        : `${unmatchedCount}개 메뉴는 정보가 부족해 분석이 어려워요. 직접 입력해주세요.`;
   }
 
   return {

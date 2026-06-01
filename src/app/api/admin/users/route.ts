@@ -1,14 +1,10 @@
 import { desc } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
+import { requireAdmin } from "@/lib/admin";
 
-const FALLBACK_PASSWORD = "ddj2026";
-
-export async function GET(req: Request) {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  if (pw !== expected) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+export async function GET() {
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
 
   const rows = await db
     .select({

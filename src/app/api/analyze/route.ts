@@ -1,11 +1,11 @@
 // 메인 분석 API
 //
 // 흐름:
-// 1) 로그인 세션 + 쿠키/IP 기반 횟수 제한 체크
+// 1) 세션 + 분석 횟수 제한 체크 (비회원 3 / 회원 5 / 어드민 ∞)
 // 2) 네이버 플레이스 크롤링
-// 3) 점수 계산 (analyzeStore — 상권 종합 + 마케팅 분리)
+// 3) 점수 계산
 // 4) DB 저장
-// 5) 사용 카운트 증가 (성공 시에만)
+// 5) 사용 카운트 증가
 
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/lib/db";
@@ -14,11 +14,10 @@ import { analyzeStore } from "@/lib/scoring";
 import {
   checkRateLimit,
   recordUsage,
-  FREE_LIMIT,
+  LIMITS,
 } from "@/lib/analyze/rate-limit";
 
 export async function POST(req: Request) {
-  // 1. 입력 파싱
   let body: { url?: string };
   try {
     body = await req.json();
@@ -37,17 +36,20 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. 세션 + 횟수 제한
-  const session = await auth();
-  const userId = session?.user?.id ?? null;
-
-  const limit = await checkRateLimit(req, userId);
+  // 횟수 제한
+  const limit = await checkRateLimit(req, "analyze");
   if (!limit.allowed) {
     return Response.json(
       {
         ok: false,
-        error: "무료 분석 횟수를 모두 사용했어요.",
-        hint: "로그인하시면 계속 이용할 수 있어요.",
+        error:
+          limit.tier === "guest"
+            ? "무료 분석 횟수를 모두 사용했어요."
+            : "오늘 분석 한도를 모두 사용했어요. 내일 다시 시도해주세요.",
+        hint:
+          limit.tier === "guest"
+            ? "회원가입하시면 하루 5회까지 이용할 수 있어요."
+            : undefined,
         rateLimited: true,
         limit,
       },
@@ -55,7 +57,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3. 크롤링
+  // 크롤링
   let place;
   try {
     place = await fetchPlaceData(url);
@@ -76,10 +78,12 @@ export async function POST(req: Request) {
     );
   }
 
-  // 4. 점수 계산 (지번 + 도로명 각각 전달)
+  // 점수 계산
   const result = analyzeStore(place.address, place.roadAddress, place.menus);
 
-  // 5. DB 저장 — totalScore는 상권 종합 점수 사용
+  // DB 저장
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
   const id = `anl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   await db.insert(schema.analyses).values({
     id,
@@ -91,31 +95,28 @@ export async function POST(req: Request) {
       store: result.store.score,
       marketing: result.marketing.score,
       region: result.details.region.score,
-      menu: result.details.menu.score,
+      menu: result.details.menu.score ?? -1,
     },
     totalScore: result.store.score,
     reportData: { place, result },
   });
 
-  // 6. 사용 카운트 증가
-  await recordUsage(req, userId);
+  await recordUsage(req, "analyze");
+  const after = await checkRateLimit(req, "analyze");
 
-  // 7. 응답
-  const after = await checkRateLimit(req, userId);
-
-  return Response.json({
-    ok: true,
-    id,
-    place,
-    result,
-    limit: after,
-  });
+  return Response.json({ ok: true, id, place, result, limit: after });
 }
 
-// 횟수 정보만 조회 (폼 진입 시 "X회 남음" 표시용)
+// 남은 횟수 조회
 export async function GET(req: Request) {
-  const session = await auth();
-  const userId = session?.user?.id ?? null;
-  const limit = await checkRateLimit(req, userId);
-  return Response.json({ ok: true, limit, free: FREE_LIMIT });
+  const [analyze, pdf] = await Promise.all([
+    checkRateLimit(req, "analyze"),
+    checkRateLimit(req, "pdf"),
+  ]);
+  return Response.json({
+    ok: true,
+    limit: analyze,
+    pdf,
+    limits: LIMITS,
+  });
 }

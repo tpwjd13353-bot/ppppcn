@@ -18,6 +18,7 @@ import { db, schema } from "@/lib/db";
 import type { AnalysisResult } from "@/lib/types/scoring";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
 import { ScoreGauge } from "./ScoreGauge";
+import { RefineForm } from "./RefineForm";
 import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -150,7 +151,7 @@ export default async function ResultPage({
             <SubScore
               icon={<Utensils className="h-3.5 w-3.5" />}
               label="메뉴"
-              score={details.menu.score}
+              score={details.menu.score ?? null}
               hint={`${details.menu.matchedCount}/${details.menu.matches.length} 매칭`}
             />
           </div>
@@ -231,11 +232,11 @@ export default async function ResultPage({
                         {m.score}
                       </span>
                     ) : (
-                      <span className="text-amber-500">50</span>
+                      <span className="text-amber-500" title="정보 부족">?</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {m.matched ? m.분류 : "별도 분석 필요"}
+                    {m.matched ? m.분류 : "정보 부족"}
                   </td>
                 </tr>
               ))}
@@ -243,6 +244,14 @@ export default async function ResultPage({
           </table>
         </div>
       </section>
+
+      {/* 미매칭 메뉴 직접 입력 (불일치 메뉴가 있을 때만) */}
+      {details.menu.unmatchedCount > 0 && (
+        <RefineForm
+          analysisId={id}
+          unmatchedCount={details.menu.unmatchedCount}
+        />
+      )}
 
       {/* PDF 보고서 잠금 / 다운로드 카드 */}
       <PdfReportCard isMember={isMember} analysisId={id} placeName={place.name} />
@@ -364,7 +373,7 @@ function SubScore({
 }: {
   icon: React.ReactNode;
   label: string;
-  score: number;
+  score: number | null;
   hint?: string;
 }) {
   return (
@@ -373,9 +382,13 @@ function SubScore({
         {icon}
         <span>{label}</span>
       </div>
-      <p className={`mt-1 font-heading text-2xl font-bold ${scoreColor(score)}`}>
-        {score}
-      </p>
+      {score === null ? (
+        <p className="mt-1 font-heading text-2xl font-bold text-amber-500">?</p>
+      ) : (
+        <p className={`mt-1 font-heading text-2xl font-bold ${scoreColor(score)}`}>
+          {score}
+        </p>
+      )}
       {hint && (
         <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
       )}

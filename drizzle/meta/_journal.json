@@ -15,6 +15,13 @@
       "when": 1780292515182,
       "tag": "0001_add_user_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780319234614,
+      "tag": "0002_add_usage_type",
+      "breakpoints": true
     }
   ]
 }

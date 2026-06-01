@@ -1,19 +1,11 @@
 import { fetchPlaceData, NaverParseError } from "@/lib/analyze/naver";
 import { analyzeStore } from "@/lib/scoring";
-
-const FALLBACK_PASSWORD = "ddj2026";
-
-function checkAdmin(req: Request): boolean {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  return pw === expected;
-}
+import { requireAdmin } from "@/lib/admin";
 
 // 관리자용 미리보기 — 크롤링 + 점수 계산까지 통째로 응답
 export async function POST(req: Request) {
-  if (!checkAdmin(req)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
 
   let body: {
     url?: string;

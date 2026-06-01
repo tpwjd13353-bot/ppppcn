@@ -1,17 +1,9 @@
 import { getScoreData, reloadScoreData } from "@/lib/analyze/scoreData";
-
-const FALLBACK_PASSWORD = "ddj2026";
-
-function checkAdmin(req: Request): boolean {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  return pw === expected;
-}
+import { requireAdmin } from "@/lib/admin";
 
 export async function GET(req: Request) {
-  if (!checkAdmin(req)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
 
   const url = new URL(req.url);
   const reload = url.searchParams.get("reload") === "1";

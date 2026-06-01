@@ -1,8 +1,7 @@
 import { readJson, writeJson } from "@/lib/storage";
 import { notifyNewInquiry } from "@/lib/notify";
+import { requireAdmin } from "@/lib/admin";
 import type { Inquiry, InquiryData } from "@/lib/inquiry";
-
-const FALLBACK_PASSWORD = "ddj2026";
 
 export async function POST(req: Request) {
   let body: Partial<Inquiry>;
@@ -39,12 +38,9 @@ export async function POST(req: Request) {
   return Response.json({ ok: true });
 }
 
-export async function GET(req: Request) {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  if (pw !== expected) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+export async function GET() {
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
   const data = await readJson<InquiryData>("inquiries.json", { inquiries: [] });
   return Response.json(data);
 }

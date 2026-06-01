@@ -1,14 +1,10 @@
 import sharp from "sharp";
 import { saveMedia, mediaUrl } from "@/lib/storage";
-
-const FALLBACK_PASSWORD = "ddj2026";
+import { requireAdmin } from "@/lib/admin";
 
 export async function POST(req: Request) {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  if (pw !== expected) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
 
   let file: File | null = null;
   try {

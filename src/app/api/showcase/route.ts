@@ -1,7 +1,6 @@
 import { readJson, writeJson } from "@/lib/storage";
+import { requireAdmin } from "@/lib/admin";
 import type { ShowcaseData } from "@/lib/showcase";
-
-const FALLBACK_PASSWORD = "ddj2026";
 
 export async function GET() {
   const data = await readJson<ShowcaseData>("showcase.json", { cards: [] });
@@ -9,11 +8,8 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const pw = req.headers.get("x-admin-password") ?? "";
-  const expected = process.env.ADMIN_PASSWORD ?? FALLBACK_PASSWORD;
-  if (pw !== expected) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  const admin = await requireAdmin();
+  if (!admin) return new Response("Unauthorized", { status: 401 });
 
   let body: ShowcaseData;
   try {

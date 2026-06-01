@@ -1,6 +1,5 @@
 import { AnalyzeForm } from "./AnalyzeForm";
-import { auth } from "@/lib/auth";
-import { checkRateLimit, FREE_LIMIT } from "@/lib/analyze/rate-limit";
+import { checkRateLimit } from "@/lib/analyze/rate-limit";
 import { headers } from "next/headers";
 
 export const metadata = {
@@ -8,18 +7,12 @@ export const metadata = {
   description: "네이버 플레이스 URL만 넣으면 중국 관광객 선호도를 분석해드려요.",
 };
 
-// 매 요청마다 횟수 다시 체크
 export const dynamic = "force-dynamic";
 
 export default async function AnalyzePage() {
-  // 서버에서 현재 남은 횟수를 미리 알려주기 위한 사전 조회
-  const session = await auth();
-  const userId = session?.user?.id ?? null;
-
-  // checkRateLimit이 Request 객체를 기대하므로 headers() 로 가짜 Request 구성
   const h = await headers();
   const fakeReq = new Request("http://localhost/analyze", { headers: h });
-  const limit = await checkRateLimit(fakeReq, userId);
+  const limit = await checkRateLimit(fakeReq, "analyze");
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16 md:py-24">
@@ -38,9 +31,9 @@ export default async function AnalyzePage() {
       </header>
 
       <AnalyzeForm
-        isMember={limit.isMember}
+        tier={limit.tier}
         remaining={limit.remaining}
-        limit={FREE_LIMIT}
+        limit={limit.limit}
       />
 
       <section className="mt-16 grid gap-6 md:grid-cols-3">

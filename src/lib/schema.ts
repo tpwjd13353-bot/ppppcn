@@ -80,6 +80,8 @@ export const analyses = sqliteTable("analyses", {
 
 export const usageLog = sqliteTable("usage_log", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  // "analyze" = 분석 1회, "pdf" = PDF 다운로드 1회
+  type: text("type").notNull().default("analyze"),
   ipHash: text("ipHash").notNull(),
   uaHash: text("uaHash"),
   userId: text("userId").references(() => users.id, { onDelete: "set null" }),

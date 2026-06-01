@@ -1,0 +1,1 @@
+ALTER TABLE `usage_log` ADD `type` text DEFAULT 'analyze' NOT NULL;

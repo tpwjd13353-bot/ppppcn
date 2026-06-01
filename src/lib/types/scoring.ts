@@ -28,7 +28,8 @@ export interface MenuMatch {
 }
 
 export interface MenuScore {
-  score: number;
+  /** 매칭된 메뉴의 평균. 모두 미매칭이면 null. */
+  score: number | null;
   matches: MenuMatch[];
   matchedCount: number;
   unmatchedCount: number;
