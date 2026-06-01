@@ -1,5 +1,5 @@
 // 3페이지 — 처방 / 액션 가이드
-import { Page, View, Text } from "@react-pdf/renderer";
+import { Page, View, Text, Link } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing } from "./styles";
 import { page3Stage, type Scenario } from "./scenario";
 import { BackgroundImage } from "./BackgroundImage";
@@ -177,7 +177,7 @@ export function PdfPage3({
         <View style={{ marginTop: spacing.sm, gap: 6 }}>
           <CTAButton
             primary
-            label="카톡으로 상담 신청"
+            label="카톡으로 상담 신청  ▶"
             href={contactKakao}
           />
           <CTAButton
@@ -343,6 +343,7 @@ function CTAButton({
   label,
   sub,
   primary,
+  href,
 }: {
   label: string;
   sub?: string;
@@ -359,27 +360,31 @@ function CTAButton({
         { padding: spacing.sm },
       ]}
     >
-      <Text
-        style={{
-          fontSize: fontSize.sm,
-          fontWeight: 700,
-          color: primary ? "#FFFFFF" : colors.text,
-          lineHeight: 1.3,
-        }}
-      >
-        {label}
-      </Text>
-      {sub && (
+      <Link src={href} style={{ textDecoration: "none" }}>
         <Text
           style={{
-            fontSize: fontSize.xs,
-            color: primary ? "#D9E1EE" : colors.textMuted,
-            marginTop: 2,
+            fontSize: fontSize.sm,
+            fontWeight: 700,
+            color: primary ? "#FFFFFF" : colors.text,
             lineHeight: 1.3,
           }}
         >
-          {sub}
+          {label}
         </Text>
+      </Link>
+      {sub && (
+        <Link src={href} style={{ textDecoration: "none" }}>
+          <Text
+            style={{
+              fontSize: fontSize.xs,
+              color: primary ? "#D9E1EE" : colors.textMuted,
+              marginTop: 2,
+              lineHeight: 1.3,
+            }}
+          >
+            {sub}
+          </Text>
+        </Link>
       )}
     </View>
   );

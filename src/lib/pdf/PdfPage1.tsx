@@ -310,11 +310,15 @@ export function PdfPage1({
         <DataCard big="509만" small="2025년 방한 중국인" note="한국관광공사" />
         <DataCard
           big={
-            loss?.monthlyChineseVisitors
-              ? `${(loss.monthlyChineseVisitors / 1000).toFixed(loss.monthlyChineseVisitors >= 10000 ? 0 : 1)}천명`
+            loss?.annualChineseVisitors
+              ? formatVisitorsMan(loss.annualChineseVisitors)
               : "—"
           }
-          small={sigungu ? `${sigungu} 월 중국인` : "월 중국인 방문"}
+          small={
+            sigungu
+              ? `${sigungu} 연 방문 중국인 관광객`
+              : "연 방문 중국인 관광객"
+          }
           note={sigungu ? `전국 ${loss?.nationalRank}위` : ""}
           highlight
         />
@@ -434,6 +438,13 @@ function ScoreBox3({
       </Text>
     </View>
   );
+}
+
+function formatVisitorsMan(n: number): string {
+  const man = n / 10000;
+  if (man >= 100) return `${Math.round(man).toLocaleString()}만명`;
+  if (man >= 10) return `${Math.round(man)}만명`;
+  return `${man.toFixed(1)}만명`;
 }
 
 function getGradeFromScore(score: number | null): string {

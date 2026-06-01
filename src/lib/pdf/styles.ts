@@ -193,20 +193,23 @@ export const styles = StyleSheet.create({
     lineHeight: 1.2,
   },
 
-  // 표
+  // 표 — 배경 이미지 위에서도 선 명확하게
   tableRow: {
     flexDirection: "row",
-    borderBottomWidth: 0.4,
-    borderBottomColor: colors.border,
-    paddingVertical: 6,
+    borderBottomWidth: 1.2,
+    borderBottomColor: colors.textMuted,
+    paddingVertical: 8,
+    backgroundColor: colors.bg, // 배경 이미지 가림
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: colors.surface,
-    paddingVertical: 6,
+    backgroundColor: colors.primarySoft,
+    paddingVertical: 7,
     paddingHorizontal: 8,
-    borderBottomWidth: 0.6,
-    borderBottomColor: colors.borderStrong,
+    borderBottomWidth: 1.2,
+    borderBottomColor: colors.primary,
+    borderTopWidth: 0.8,
+    borderTopColor: colors.primary,
   },
   tableCell: {
     fontSize: fontSize.sm,
@@ -215,8 +218,8 @@ export const styles = StyleSheet.create({
 
   // 구분선
   divider: {
-    height: 0.6,
-    backgroundColor: colors.border,
+    height: 1.5,
+    backgroundColor: colors.text,
     marginVertical: spacing.lg,
   },
 
