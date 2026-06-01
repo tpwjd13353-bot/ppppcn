@@ -84,21 +84,26 @@ export function estimateLoss(
 
 /**
  * 손실 금액을 한국어 단위로 포매팅.
- * 0.1억 단위로 반올림했을 때 1억 이상이면 "X.X억원", 그 미만은 만원 단위.
- *   예) 99,900,000 → "1.0억원" (X "9,990만원")
- *       12,300,000,000 → "123억원"
+ *   1억 미만:  "X,XXX만원"           (예: 9,990만원)
+ *   1억 이상:  "X억 Y,YYY만원" 또는    (예: 1억 8,400만원)
+ *             "X억원"                 (만원 단위가 0일 때, 예: 36억원)
+ * 만원 단위까지 정확히 표시해 신뢰감을 확보.
  */
 export function formatLossKRW(amount: number): string {
-  const eokFloat = amount / 100_000_000;
-  const eokRounded = Math.round(eokFloat * 10) / 10;
-
-  if (eokRounded >= 1.0) {
-    return eokRounded >= 10
-      ? `${Math.round(eokRounded)}억원`
-      : `${eokRounded.toFixed(1)}억원`;
+  if (amount < 100_000_000) {
+    const manwon = Math.round(amount / 10_000);
+    return `${manwon.toLocaleString()}만원`;
   }
-  const manwon = Math.round(amount / 10_000);
-  return `${manwon.toLocaleString()}만원`;
+  // 1억 이상: 억 + 만원 분리
+  const eok = Math.floor(amount / 100_000_000);
+  const remainderMan = Math.round((amount % 100_000_000) / 10_000);
+
+  // 만원 단위가 1억으로 올라간 경우
+  if (remainderMan >= 10_000) {
+    return `${eok + 1}억원`;
+  }
+  if (remainderMan === 0) return `${eok}억원`;
+  return `${eok}억 ${remainderMan.toLocaleString()}만원`;
 }
 
 /** "연 X ~ Y" 형태 텍스트 */
