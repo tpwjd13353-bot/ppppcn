@@ -191,73 +191,10 @@ export default async function ResultPage({
         </ScoreCard>
       </section>
 
-      {/* ─────────────────────────────────────────
-          4. 메뉴 분석 표 — 근거
-          ───────────────────────────────────────── */}
-      <section className="mt-10">
-        <h2 className="font-heading text-xl font-bold">메뉴 분석 상세</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          입력된 메뉴 {details.menu.matches.length}개를 우리 DB와 매칭한 결과
-        </p>
-        <div className="mt-4 overflow-hidden rounded-xl border border-border/40">
-          <table className="w-full text-sm">
-            <thead className="bg-background/40">
-              <tr className="text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">
-                  네이버 메뉴
-                </th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">
-                  DB 매칭
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  점수
-                </th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">
-                  분류
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {details.menu.matches.map((m, i) => (
-                <tr
-                  key={i}
-                  className={`border-t border-border/30 ${m.matched ? "" : "bg-amber-500/[0.03]"}`}
-                >
-                  <td className="px-4 py-3">{m.input}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {m.matched ? m.menuName : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono">
-                    {m.matched ? (
-                      <span className={scoreColor(m.score ?? 0)}>
-                        {m.score}
-                      </span>
-                    ) : (
-                      <span className="text-amber-500" title="정보 부족">?</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {m.matched ? m.분류 : "정보 부족"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* 미매칭 메뉴 직접 입력 (불일치 메뉴가 있을 때만) */}
-      {details.menu.unmatchedCount > 0 && (
-        <RefineForm
-          analysisId={id}
-          unmatchedCount={details.menu.unmatchedCount}
-        />
-      )}
-
-      {/* ─── 여기까지 진단·근거 ─── 아래부터 인사이트 + CTA ─── */}
+      {/* ─── 점수까지 — 아래부터 영업 흐름 (진단→인사이트→시급성→CTA) ─── */}
 
       {/* ─────────────────────────────────────────
-          5. 진단 한 줄 + (조건부) 격차 시각화
+          4. 진단 한 줄 + (조건부) 격차 시각화
           ───────────────────────────────────────── */}
       <section
         className={`mt-10 rounded-2xl border p-6 md:p-8 ${
@@ -326,6 +263,71 @@ export default async function ResultPage({
             </div>
           </div>
         </section>
+      )}
+
+      {/* ─────────────────────────────────────────
+          6. 메뉴 분석 상세 — 매장 데이터 디테일
+          ───────────────────────────────────────── */}
+      <section className="mt-10">
+        <h2 className="font-heading text-xl font-bold">메뉴 분석 상세</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          입력된 메뉴 {details.menu.matches.length}개를 우리 DB와 매칭한 결과입니다.
+          {details.menu.unmatchedCount > 0 &&
+            " 누락된 메뉴를 직접 입력하면 더 정확한 점수를 받아보실 수 있어요."}
+        </p>
+        <div className="mt-4 overflow-hidden rounded-xl border border-border/40">
+          <table className="w-full text-sm">
+            <thead className="bg-background/40">
+              <tr className="text-left">
+                <th className="px-4 py-3 font-medium text-muted-foreground">
+                  네이버 메뉴
+                </th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">
+                  DB 매칭
+                </th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                  점수
+                </th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">
+                  분류
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {details.menu.matches.map((m, i) => (
+                <tr
+                  key={i}
+                  className={`border-t border-border/30 ${m.matched ? "" : "bg-amber-500/[0.03]"}`}
+                >
+                  <td className="px-4 py-3">{m.input}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {m.matched ? m.menuName : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono">
+                    {m.matched ? (
+                      <span className={scoreColor(m.score ?? 0)}>
+                        {m.score}
+                      </span>
+                    ) : (
+                      <span className="text-amber-500" title="정보 부족">?</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {m.matched ? m.분류 : "정보 부족"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* 미매칭 메뉴 직접 입력 (불일치 메뉴가 있을 때만) */}
+      {details.menu.unmatchedCount > 0 && (
+        <RefineForm
+          analysisId={id}
+          unmatchedCount={details.menu.unmatchedCount}
+        />
       )}
 
       {/* ─────────────────────────────────────────
