@@ -20,7 +20,7 @@ import {
   checkRateLimit,
   recordUsage,
 } from "@/lib/analyze/rate-limit";
-import { estimateLoss } from "@/lib/analyze/lossEstimate";
+import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
 import { PdfReport } from "@/lib/pdf/PdfReport";
 import { registerPdfFonts } from "@/lib/pdf/registerFonts";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
@@ -126,34 +126,6 @@ export async function GET(
       "Cache-Control": "private, no-store",
     },
   });
-}
-
-// 분석 결과에서 시도/시군구 추출 + 손실 추정 조회
-async function lookupLossFromReport(report: {
-  place: NaverPlaceData;
-  result: AnalysisResult;
-}) {
-  const { region } = report.result.details;
-  const tier = region.match.tier;
-
-  const { getScoreData } = await import("@/lib/analyze/scoreData");
-  const data = getScoreData();
-
-  // 1) 주소 텍스트에서 직접 시도+시군구 매칭
-  const addr = `${report.place.address ?? ""} ${report.place.roadAddress ?? ""}`;
-  for (const stat of data.regionStats) {
-    if (addr.includes(stat.sigungu) && addr.includes(stat.sido.slice(0, 2))) {
-      return estimateLoss(stat.sido, stat.sigungu);
-    }
-  }
-
-  // 2) 상권 매칭이면 상권 → 시군구 변환
-  if (tier === "상권" && region.match.matchedName) {
-    const sg = data.sanggwons.find((s) => s.name === region.match.matchedName);
-    if (sg) return estimateLoss(sg.sido, sg.sigungu);
-  }
-
-  return null;
 }
 
 function sanitizeFilename(name: string): string {
