@@ -1,11 +1,26 @@
 import { ImageResponse } from "next/og";
+import fs from "node:fs";
+import path from "node:path";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "퍼플페퍼 — 중국 관광객 마케팅 · 따종디엔핑 공식 대행사";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OgImage() {
+  const fontBold = fs.readFileSync(
+    path.join(process.cwd(), "public/fonts/Pretendard-Bold.otf"),
+  );
+  const fontSemi = fs.readFileSync(
+    path.join(process.cwd(), "public/fonts/Pretendard-SemiBold.otf"),
+  );
+  const fontReg = fs.readFileSync(
+    path.join(process.cwd(), "public/fonts/Pretendard-Regular.otf"),
+  );
+
+  const bg = fs.readFileSync(path.join(process.cwd(), "public/og-bg.png"));
+  const bgDataUri = `data:image/png;base64,${bg.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -16,17 +31,26 @@ export default async function OgImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          background: "linear-gradient(135deg, #0F2845 0%, #1F3A5F 60%, #2D2A55 100%)",
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 28%, rgba(0,0,0,0.0) 50%, rgba(0,0,0,0.25) 78%, rgba(0,0,0,0.7) 100%), url(${bgDataUri})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           color: "#FFFFFF",
-          fontFamily: "sans-serif",
+          fontFamily: "Pretendard",
         }}
       >
-        {/* 상단 헤더 */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        {/* 상단: 브랜드 + MEITUAN 뱃지 */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            width: "100%",
+          }}
+        >
           <div
             style={{
               fontSize: 28,
-              fontWeight: 800,
+              fontWeight: 700,
               letterSpacing: 4,
               color: "#FFFFFF",
             }}
@@ -37,11 +61,10 @@ export default async function OgImage() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
-              padding: "10px 18px",
-              border: "2px solid rgba(255,255,255,0.5)",
+              padding: "10px 22px",
+              border: "1.6px solid rgba(255,255,255,0.7)",
               borderRadius: 9999,
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: 700,
               letterSpacing: 2,
               color: "#FFFFFF",
@@ -51,12 +74,12 @@ export default async function OgImage() {
           </div>
         </div>
 
-        {/* 중앙 메인 카피 */}
+        {/* 중앙: 메인 카피 */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
               fontSize: 80,
-              fontWeight: 800,
+              fontWeight: 700,
               lineHeight: 1.15,
               letterSpacing: -2,
               color: "#FFFFFF",
@@ -66,10 +89,10 @@ export default async function OgImage() {
           </div>
           <div
             style={{
-              marginTop: 24,
-              fontSize: 32,
+              marginTop: 22,
+              fontSize: 30,
               lineHeight: 1.4,
-              color: "rgba(255,255,255,0.78)",
+              color: "rgba(255,255,255,0.85)",
               fontWeight: 500,
             }}
           >
@@ -77,9 +100,9 @@ export default async function OgImage() {
           </div>
           <div
             style={{
-              marginTop: 12,
-              fontSize: 28,
-              color: "rgba(255,255,255,0.6)",
+              marginTop: 10,
+              fontSize: 24,
+              color: "rgba(255,255,255,0.7)",
               fontWeight: 400,
             }}
           >
@@ -87,22 +110,44 @@ export default async function OgImage() {
           </div>
         </div>
 
-        {/* 하단 도메인 */}
+        {/* 하단: 도메인 + 카피 */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            fontSize: 22,
-            color: "rgba(255,255,255,0.55)",
-            letterSpacing: 1,
+            width: "100%",
           }}
         >
-          <span>ppppcn.com</span>
-          <span>중국 마케팅 전문 대행사</span>
+          <span
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: 2,
+              color: "rgba(255,255,255,0.92)",
+            }}
+          >
+            ppppcn.com
+          </span>
+          <span
+            style={{
+              fontSize: 20,
+              color: "rgba(255,255,255,0.7)",
+              fontWeight: 500,
+            }}
+          >
+            중국 마케팅 전문 대행사
+          </span>
         </div>
       </div>
     ),
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        { name: "Pretendard", data: fontReg, weight: 400, style: "normal" },
+        { name: "Pretendard", data: fontSemi, weight: 500, style: "normal" },
+        { name: "Pretendard", data: fontBold, weight: 700, style: "normal" },
+      ],
+    },
   );
 }
