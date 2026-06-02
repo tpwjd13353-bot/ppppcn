@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 
@@ -73,14 +72,6 @@ export function LoginForm({ callbackUrl, initialError }: Props) {
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         이메일로 로그인
       </button>
-      <div className="flex justify-end pt-1">
-        <Link
-          href="/reset-password"
-          className="text-xs text-muted-foreground hover:text-primary"
-        >
-          비밀번호를 잊으셨나요?
-        </Link>
-      </div>
     </form>
   );
 }
