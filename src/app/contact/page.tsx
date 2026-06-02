@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { InquiryForm } from "@/components/sections/InquiryForm";
 import { MessageCircle, Mail, Phone, ArrowRight, Check } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "상담 신청 — 무료 컨설팅",
+  description:
+    "방한 중국 관광객 마케팅 상담을 신청하세요. 김세정 본부장 직접 응대. 카카오 오픈채팅·전화·이메일·문의 폼.",
+  alternates: { canonical: "https://ppppcn.com/contact" },
+  openGraph: {
+    title: "상담 신청 — 퍼플페퍼",
+    description:
+      "방한 중국 관광객 마케팅 무료 상담. 따종디엔핑·샤오홍슈·고덕지도 전문.",
+    url: "https://ppppcn.com/contact",
+  },
+};
 
 const KAKAO_URL = "https://open.kakao.com/o/skmX5Pwi";
 

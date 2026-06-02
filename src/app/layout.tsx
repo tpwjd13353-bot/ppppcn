@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Inter } from "next/font/google";
 import "@fontsource/pretendard";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { auth } from "@/lib/auth";
 
 const inter = Inter({
@@ -75,8 +76,21 @@ export const metadata: Metadata = {
     other: {
       "naver-site-verification":
         process.env.NEXT_PUBLIC_NAVER_VERIFICATION ?? "",
+      ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
+        ? { "google-site-verification": process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION }
+        : {}),
     },
   },
+  category: "marketing",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0F2845" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F2845" },
+  ],
 };
 
 export default async function RootLayout({
@@ -98,6 +112,7 @@ export default async function RootLayout({
       className={`dark ${inter.variable} ${archivoBlack.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        <JsonLd />
         <Header user={headerUser} />
         {children}
         <Footer />

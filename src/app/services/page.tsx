@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Check } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "대행 서비스 — 따종디엔핑·샤오홍슈·고덕지도",
+  description:
+    "따종디엔핑 매장 등록·운영·CPC 광고, 샤오홍슈 KOC/KOL 시딩, 고덕지도 등록, 도우인·웨이보 콘텐츠 운영. 메이투안 본사 정식 인증 대행 서비스.",
+  alternates: { canonical: "https://ppppcn.com/services" },
+  openGraph: {
+    title: "대행 서비스 — 퍼플페퍼",
+    description:
+      "따종디엔핑·샤오홍슈·고덕지도·도우인·웨이보 통합 운영. 매장 등록부터 CPC 광고·콘텐츠 시딩까지.",
+    url: "https://ppppcn.com/services",
+  },
+};
 
 type Service = {
   no: string;

@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FinalCTA } from "@/components/sections/FinalCTA";
+
+export const metadata: Metadata = {
+  title: "레퍼런스 — 직접 운영 매장과 클라이언트 사례",
+  description:
+    "퍼플페퍼가 직접 운영한 매장 실적과 클라이언트 사례. 홍대 연 15억, 여수 연 58억, C 프랜차이즈 12지점 확장 등.",
+  alternates: { canonical: "https://ppppcn.com/work" },
+  openGraph: {
+    title: "레퍼런스 — 퍼플페퍼",
+    description: "직접 운영 매장과 클라이언트 사례로 증명하는 중국 마케팅 성과.",
+    url: "https://ppppcn.com/work",
+  },
+};
 
 type Case = {
   name?: string;

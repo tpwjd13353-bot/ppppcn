@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { BadgeCheck, Store, Megaphone, Users } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "회사 소개 — 메이투안 본사 정식 인증 대행사",
+  description:
+    "퍼플페퍼는 따종디엔핑 메이투안 본사 정식 인증 대행사입니다. 전담 운영 인력 350명, 일평균 매장 광고 집행 12,400건, 직접 운영 매장 홍대 15억·여수 58억 실적.",
+  alternates: { canonical: "https://ppppcn.com/about" },
+  openGraph: {
+    title: "회사 소개 — 퍼플페퍼",
+    description:
+      "메이투안 본사 정식 인증 대행사. 직접 운영 매장 실적과 350명 전담 인력으로 증명하는 중국 마케팅 전문 회사.",
+    url: "https://ppppcn.com/about",
+  },
+};
 
 const BIG_STATS = [
   { num: "350명", label: "전담 운영 인력" },
