@@ -30,11 +30,7 @@ export default async function AnalyzePage() {
         </p>
       </header>
 
-      <AnalyzeForm
-        tier={limit.tier}
-        remaining={limit.remaining}
-        limit={limit.limit}
-      />
+      <AnalyzeForm tier={limit.tier} />
 
       <section className="mt-16 grid gap-6 md:grid-cols-3">
         <Step n={1} title="네이버 URL 입력" body="모바일 / PC URL 모두 가능" />

@@ -708,7 +708,7 @@ function PdfReportCard({
                 PDF 다운로드
               </a>
               <p className="text-center text-[11px] text-muted-foreground/70 md:text-right">
-                회원 24시간 3회 · 메이투안 인증 보고서
+                계정당 총 3회 · 메이투안 인증 보고서
               </p>
             </>
           ) : (
@@ -721,7 +721,7 @@ function PdfReportCard({
                 3초 가입하고 PDF 받기
               </Link>
               <p className="text-center text-[11px] text-muted-foreground/70 md:text-right">
-                카카오 · 이메일 가입 · 가입 즉시 무제한 분석
+                카카오 · 이메일 가입 · 가입 후 PDF 3회 제공
               </p>
             </>
           )}

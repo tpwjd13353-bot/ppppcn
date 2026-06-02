@@ -2,23 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Loader2, Search, AlertCircle, Lock } from "lucide-react";
+import { Loader2, Search, AlertCircle } from "lucide-react";
 
 interface Props {
   tier: "guest" | "member" | "admin";
-  remaining: number;
-  limit: number;
 }
 
-export function AnalyzeForm({ tier, remaining, limit }: Props) {
+export function AnalyzeForm({ tier }: Props) {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<{ message: string; hint?: string } | null>(
     null,
   );
-  const [rateLimited, setRateLimited] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +25,6 @@ export function AnalyzeForm({ tier, remaining, limit }: Props) {
 
     setSubmitting(true);
     setError(null);
-    setRateLimited(false);
 
     try {
       const res = await fetch("/api/analyze", {
@@ -38,12 +33,6 @@ export function AnalyzeForm({ tier, remaining, limit }: Props) {
         body: JSON.stringify({ url: url.trim() }),
       });
       const data = await res.json();
-
-      if (res.status === 429) {
-        setRateLimited(true);
-        setSubmitting(false);
-        return;
-      }
 
       if (!data.ok) {
         setError({ message: data.error, hint: data.hint });
@@ -63,25 +52,12 @@ export function AnalyzeForm({ tier, remaining, limit }: Props) {
 
   return (
     <div className="mt-12 rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur md:p-8">
-      <div className="mb-4 flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">
+      <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+        <span>
           {tier === "admin" ? (
             <span className="text-primary">어드민: 무제한 이용</span>
-          ) : tier === "member" ? (
-            <>
-              회원 분석 가능{" "}
-              <span className="font-bold text-foreground">
-                {remaining} / {limit}
-              </span>
-              <span className="ml-1 text-xs">(24시간)</span>
-            </>
           ) : (
-            <>
-              남은 무료 분석{" "}
-              <span className="font-bold text-foreground">
-                {remaining} / {limit}
-              </span>
-            </>
+            <span>상권 분석 무제한 · PDF 보고서는 회원 가입 후 3회</span>
           )}
         </span>
       </div>
@@ -140,50 +116,6 @@ export function AnalyzeForm({ tier, remaining, limit }: Props) {
         </div>
       )}
 
-      {rateLimited && (
-        <div className="mt-6 rounded-md border border-primary/40 bg-primary/5 p-6">
-          <div className="flex items-start gap-3">
-            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div className="flex-1">
-              {tier === "guest" ? (
-                <>
-                  <p className="font-heading text-base font-bold">
-                    무료 분석 {limit}회를 모두 사용했어요
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    회원가입하시면 하루 5회까지 이용할 수 있어요. 카카오 3초 가입.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-heading text-base font-bold">
-                    오늘 분석 한도를 모두 사용했어요
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    24시간 후 자동으로 초기화돼요. 더 필요하시면 상담을 신청해보세요.
-                  </p>
-                </>
-              )}
-              <div className="mt-4 flex flex-wrap gap-3">
-                {tier === "guest" && (
-                  <Link
-                    href="/login?callbackUrl=/analyze"
-                    className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-                  >
-                    카카오로 가입 / 로그인
-                  </Link>
-                )}
-                <Link
-                  href="/contact"
-                  className="inline-flex h-10 items-center rounded-full border border-foreground/20 px-5 text-sm font-medium hover:border-primary hover:text-primary"
-                >
-                  상담 신청
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
