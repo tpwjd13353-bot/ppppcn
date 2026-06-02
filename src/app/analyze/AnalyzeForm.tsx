@@ -73,13 +73,13 @@ export function AnalyzeForm({ tier }: Props) {
           placeholder="https://m.place.naver.com/restaurant/1234567890/home"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          disabled={submitting || rateLimited}
+          disabled={submitting}
           className="w-full rounded-md border border-border/50 bg-background px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none disabled:opacity-60"
         />
 
         <button
           type="submit"
-          disabled={submitting || rateLimited}
+          disabled={submitting}
           className="mt-2 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? (
