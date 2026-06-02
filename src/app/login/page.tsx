@@ -1,19 +1,20 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, signIn } from "@/lib/auth";
+import { LoginForm } from "./LoginForm";
 
 export const metadata = {
   title: "로그인 — 퍼플페퍼",
-  description: "카카오 또는 이메일로 시작하세요.",
+  description: "이메일·비밀번호 또는 카카오로 로그인하세요.",
 };
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const session = await auth();
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, error } = await searchParams;
   const redirectTo = callbackUrl ?? "/onboarding";
 
   if (session?.user) redirect(redirectTo);
@@ -22,10 +23,13 @@ export default async function LoginPage({
     <main className="flex flex-1 items-center justify-center px-6 py-24">
       <div className="w-full max-w-md rounded-2xl border border-border/40 bg-background/60 p-8 backdrop-blur">
         <h1 className="font-heading text-3xl font-bold tracking-tight">
-          로그인 / 가입
+          로그인
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          처음이면 자동으로 가입돼요. 별도 절차 없습니다.
+          처음이신가요?{" "}
+          <Link href="/signup" className="font-semibold text-primary hover:underline">
+            회원가입
+          </Link>
         </p>
 
         {/* 카카오 로그인 */}
@@ -41,7 +45,7 @@ export default async function LoginPage({
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#FEE500] text-sm font-bold text-[#191919] transition hover:brightness-95"
           >
             <KakaoIcon />
-            카카오로 시작하기
+            카카오로 로그인
           </button>
         </form>
 
@@ -54,31 +58,8 @@ export default async function LoginPage({
           <div className="h-px flex-1 bg-border/40" />
         </div>
 
-        {/* 이메일 매직 링크 */}
-        <form
-          action={async (formData: FormData) => {
-            "use server";
-            await signIn("resend", {
-              email: formData.get("email"),
-              redirectTo,
-            });
-          }}
-          className="space-y-3"
-        >
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="이메일 주소"
-            className="w-full rounded-md border border-border/50 bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="inline-flex h-12 w-full items-center justify-center rounded-full border border-foreground/20 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
-          >
-            이메일로 로그인 링크 받기
-          </button>
-        </form>
+        {/* 이메일 + 비밀번호 */}
+        <LoginForm callbackUrl={redirectTo} initialError={error} />
 
         <p className="mt-6 text-xs text-muted-foreground">
           로그인하면{" "}

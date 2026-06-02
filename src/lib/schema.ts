@@ -11,12 +11,27 @@ export const users = sqliteTable("user", {
   email: text("email").unique(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
-  // ↓ 가입 후 직접 받는 프로필 정보
-  phone: text("phone"), // 휴대폰 (필수, 가입 후 받음)
+  // ↓ 자체 가입자(이메일/비번)용 — 카카오 가입자는 null
+  passwordHash: text("passwordHash"),
+  phone: text("phone"), // 휴대폰 (자체 가입자는 필수)
+  phoneVerified: integer("phoneVerified", { mode: "timestamp_ms" }), // SMS 인증 완료 시각
   businessName: text("businessName"), // 상호명 (필수)
   region: text("region"), // 지역 (선택)
   industry: text("industry"), // 업종 (선택)
   placeUrl: text("placeUrl"), // 네이버 플레이스 URL (선택)
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+// SMS 인증코드 임시 저장 (가입 / 비번 재설정)
+export const phoneCodes = sqliteTable("phone_code", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  phone: text("phone").notNull(),
+  code: text("code").notNull(), // 6자리 숫자
+  purpose: text("purpose").notNull(), // "signup" | "reset"
+  expiresAt: integer("expiresAt", { mode: "timestamp_ms" }).notNull(),
+  usedAt: integer("usedAt", { mode: "timestamp_ms" }), // 사용한 시점 (재사용 방지)
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

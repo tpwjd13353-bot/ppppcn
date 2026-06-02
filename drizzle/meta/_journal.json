@@ -22,6 +22,13 @@
       "when": 1780319234614,
       "tag": "0002_add_usage_type",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1780372966754,
+      "tag": "0003_auth_password_phone",
+      "breakpoints": true
     }
   ]
 }
