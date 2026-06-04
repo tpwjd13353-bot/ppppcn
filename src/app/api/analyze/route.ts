@@ -108,37 +108,39 @@ export async function POST(req: Request) {
   await recordUsage(req, "analyze");
   const after = await checkRateLimit(req, "analyze");
 
-  // AI 플레이북 생성 — fire-and-forget (응답 차단 X). 결과 페이지가 다음 방문 시 사용.
-  (async () => {
-    try {
-      const reportData = { place, result };
-      const [regionRow, loss] = await Promise.all([
-        lookupRegionInsight(place),
-        lookupLossFromReport(reportData),
-      ]);
-      const region = regionRow
+  // AI 플레이북 생성 — 응답 차단해서 첫 결과 페이지 도착 시 AI 결과 노출.
+  // 최대 25초 timeout. 실패해도 정적 fallback으로 결과 페이지는 정상 노출.
+  try {
+    const reportData = { place, result };
+    const [regionRow, loss] = await Promise.all([
+      lookupRegionInsight(place),
+      lookupLossFromReport(reportData),
+    ]);
+    const region = regionRow
+      ? {
+          regionName: regionRow.regionName,
+          regionAnnualVisitors: regionRow.regionAnnualVisitors,
+        }
+      : loss
         ? {
-            regionName: regionRow.regionName,
-            regionAnnualVisitors: regionRow.regionAnnualVisitors,
+            regionName: loss.sigungu,
+            regionAnnualVisitors: loss.annualChineseVisitors,
           }
-        : loss
-          ? {
-              regionName: loss.sigungu,
-              regionAnnualVisitors: loss.annualChineseVisitors,
-            }
-          : null;
-      const viral = extractViralMenus(result.details.menu.matches);
-      await generateAiPlaybook({
+        : null;
+    const viral = extractViralMenus(result.details.menu.matches);
+    await Promise.race([
+      generateAiPlaybook({
         analysisId: id,
         place,
         result,
         region,
         viral,
-      });
-    } catch (e) {
-      console.error("[analyze] aiPlaybook trigger failed:", e);
-    }
-  })();
+      }),
+      new Promise<void>((resolve) => setTimeout(resolve, 25_000)),
+    ]);
+  } catch (e) {
+    console.error("[analyze] aiPlaybook trigger failed:", e);
+  }
 
   return Response.json({ ok: true, id, place, result, limit: after });
 }

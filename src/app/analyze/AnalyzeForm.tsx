@@ -85,7 +85,7 @@ export function AnalyzeForm({ tier }: Props) {
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              분석 중... (10초 정도)
+              AI 분석 중... (15~25초 걸려요)
             </>
           ) : (
             <>
