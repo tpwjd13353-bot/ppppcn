@@ -108,13 +108,38 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-border/40 pt-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <p>
-            © {year} PURPLEPEPPER co., Ltd. · 따종디엔핑 · 샤오홍슈 · 메이투안 본사 정식 인증 대행사
-          </p>
-          <p className="font-body-en text-muted-foreground/70">
-            Connecting Chinese travelers to Korean stores.
-          </p>
+        <div className="mt-12 border-t border-border/40 pt-6">
+          <div className="grid gap-x-6 gap-y-1.5 text-[11px] leading-relaxed text-muted-foreground/80 md:grid-cols-[auto_1fr]">
+            <span className="font-medium text-muted-foreground">상호</span>
+            <span>(주)퍼플페퍼 · PURPLEPEPPER co., Ltd.</span>
+            <span className="font-medium text-muted-foreground">대표</span>
+            <span>임수백</span>
+            <span className="font-medium text-muted-foreground">사업자등록번호</span>
+            <span>319-81-03045</span>
+            <span className="font-medium text-muted-foreground">주소</span>
+            <span>서울특별시 마포구 와우산로17길 19-18 퍼플페퍼 사옥 3층</span>
+            <span className="font-medium text-muted-foreground">개인정보 보호책임자</span>
+            <span>김세정 · sejeong13@pppp.team</span>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground/70">
+            <Link href="/terms" className="hover:text-foreground">
+              서비스 이용약관
+            </Link>
+            <span className="text-muted-foreground/40">·</span>
+            <Link href="/privacy" className="font-semibold text-foreground hover:text-primary">
+              개인정보처리방침
+            </Link>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-2 text-[11px] text-muted-foreground/70 md:flex-row md:items-center md:justify-between">
+            <p>
+              © {year} PURPLEPEPPER co., Ltd. · 따종디엔핑 · 샤오홍슈 · 메이투안 본사 정식 인증 대행사
+            </p>
+            <p className="font-body-en">
+              Connecting Chinese travelers to Korean stores.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
