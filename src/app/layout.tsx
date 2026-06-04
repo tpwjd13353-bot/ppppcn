@@ -26,7 +26,7 @@ const SITE_NAME = "퍼플페퍼 PURPLEPEPPER";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "퍼플페퍼 — 중국 관광객 마케팅 · 따종디엔핑 공식 대행사",
+    default: "샤오홍슈 따종디엔핑 중국 마케팅 | 퍼플페퍼",
     template: "%s | 퍼플페퍼",
   },
   description:
@@ -53,13 +53,13 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: "퍼플페퍼 — 중국 관광객 마케팅 · 따종디엔핑 공식 대행사",
+    title: "샤오홍슈 따종디엔핑 중국 마케팅 | 퍼플페퍼",
     description:
       "방한 중국 관광객을 매장으로 연결하는 중국 마케팅 전문 대행사. 메이투안 본사 정식 인증.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "퍼플페퍼 — 중국 관광객 마케팅 · 따종디엔핑 공식 대행사",
+    title: "샤오홍슈 따종디엔핑 중국 마케팅 | 퍼플페퍼",
     description:
       "방한 중국 관광객을 매장으로 연결하는 중국 마케팅 전문 대행사.",
   },
