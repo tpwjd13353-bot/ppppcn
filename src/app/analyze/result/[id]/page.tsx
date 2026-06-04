@@ -25,6 +25,10 @@ import { MenuTable } from "./MenuTable";
 import { auth } from "@/lib/auth";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
 import { extractViralMenus, applyViralTemplate } from "@/lib/analyze/viralMenus";
+import {
+  buildMonthlyTrend,
+  formatPersons,
+} from "@/lib/analyze/monthlyDistribution";
 import { pickScenario, page2GapLine } from "@/lib/pdf/scenario";
 
 export const dynamic = "force-dynamic";
@@ -266,63 +270,60 @@ export default async function ResultPage({
             />
           </div>
 
-          {Array.isArray(region.monthlyTrend) &&
-            region.monthlyTrend.length > 0 && (
-              <div className="mt-4 rc-card-sm">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[14px] font-medium">
-                      {region.regionName} 방문 중국인 — 월별 추이 (2025)
-                    </p>
-                    <p className="mt-1 text-[12px] text-[var(--rc-txt3)]">
-                      방한 중국인 중 권역 유입 추정치 · 상대 지표
-                    </p>
-                  </div>
-                  {region.regionAnnualVisitors && (
-                    <div className="text-right">
-                      <p className="text-[26px] font-black leading-none text-[var(--rc-red)]">
-                        약{" "}
-                        {Math.round(region.regionAnnualVisitors / 10000)}만 명
-                      </p>
-                      <p className="mt-1 text-[11px] text-[var(--rc-txt3)]">
-                        2025년 권역 연간 방문 추정
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-5 flex h-[150px] items-end gap-[7px]">
-                  {region.monthlyTrend.map((m) => (
-                    <div
-                      key={m.month}
-                      className="flex flex-1 flex-col items-center gap-2"
-                    >
-                      <div className="flex w-full flex-1 items-end">
-                        <div
-                          className={`w-full rounded-t-[5px] ${
-                            m.peak ? "rc-bar-peak" : "rc-bar"
-                          }`}
-                          style={{ height: `${m.value}%` }}
-                        />
-                      </div>
-                      <span
-                        className={`text-[11px] ${
-                          m.peak
-                            ? "font-bold text-[var(--rc-amber)]"
-                            : "text-[var(--rc-txt3)]"
-                        }`}
-                      >
-                        {m.month}월
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {region.peakNote && (
-                  <p className="mt-5 text-[12px] leading-[1.6] text-[var(--rc-txt3)]">
-                    {region.peakNote}
+          {region.regionAnnualVisitors && (
+            <div className="mt-4 rc-card-sm">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-[14px] font-medium">
+                    {region.regionName} 방문 중국인 — 월별 추이 (2025)
                   </p>
-                )}
+                  <p className="mt-1 text-[12px] text-[var(--rc-txt3)]">
+                    방한 중국인 월별 입국 비중 × {region.regionName} 권역 연간 방문 추정 · 자체 추정
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[26px] font-black leading-none text-[var(--rc-red)]">
+                    약{" "}
+                    {Math.round(region.regionAnnualVisitors / 10000)}만 명
+                  </p>
+                  <p className="mt-1 text-[11px] text-[var(--rc-txt3)]">
+                    2025년 권역 연간 방문 추정
+                  </p>
+                </div>
               </div>
-            )}
+              <div className="mt-5 flex h-[150px] items-end gap-[7px]">
+                {buildMonthlyTrend(region.regionAnnualVisitors).map((m) => (
+                  <div
+                    key={m.month}
+                    className="flex flex-1 flex-col items-center gap-2"
+                  >
+                    <div className="flex w-full flex-1 items-end">
+                      <div
+                        className={`w-full rounded-t-[5px] ${
+                          m.peak ? "rc-bar-peak" : "rc-bar"
+                        }`}
+                        style={{ height: `${m.value}%` }}
+                        title={`${m.month}월 약 ${formatPersons(m.persons)}`}
+                      />
+                    </div>
+                    <span
+                      className={`text-[11px] ${
+                        m.peak
+                          ? "font-bold text-[var(--rc-amber)]"
+                          : "text-[var(--rc-txt3)]"
+                      }`}
+                    >
+                      {m.month}월
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-5 text-[12px] leading-[1.6] text-[var(--rc-txt3)]">
+                {region.peakNote ||
+                  "성수기는 5월·8월·10월(국경절) 구간으로 관측됩니다. 6월 무비자 만료 시점 이전 등록을 마치면 하반기 8월·10월 피크 기간 노출에 도움이 될 수 있습니다."}
+              </p>
+            </div>
+          )}
         </>
       )}
 

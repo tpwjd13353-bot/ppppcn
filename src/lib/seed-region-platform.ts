@@ -69,50 +69,15 @@ export async function seedRegionPlatform(): Promise<void> {
   console.log(`[seed] platform_playbook: ${platforms.length} rows upserted`);
 
   // ===== region_insight: 안산 단원구 =====
+  // 거주/상권/월별추이는 UI에서 제거 또는 자동 계산. 식별 + 권역 연간 방문 추정만 핵심.
   const ansan = {
     regionCode: "경기도|안산시 단원구",
     regionName: "안산 단원구",
     inboundTotal: 5_530_000,
     inboundYoy: "+15.4%",
-    residentForeigners: 22_839,
-    residentRank: 2,
     regionAnnualVisitors: 410_000,
     isEstimate: true,
-    sourceLabel: "한국관광공사 · 일부 자체 추정",
-    commercialZones: [
-      {
-        name: "원곡동 다문화특구",
-        weight: 88,
-        label: "이미 진입 경쟁이 높은 권역",
-        type: "hot" as const,
-      },
-      {
-        name: "고잔·중앙역 일대",
-        weight: 46,
-        label: "매장 위치 권역",
-        type: "you" as const,
-      },
-      {
-        name: "기타 안산 상권",
-        weight: 22,
-        label: "분산",
-        type: "cool" as const,
-      },
-    ],
-    monthlyTrend: [
-      { month: 1, value: 38 },
-      { month: 2, value: 52 },
-      { month: 3, value: 48 },
-      { month: 4, value: 66 },
-      { month: 5, value: 82, peak: true },
-      { month: 6, value: 71 },
-      { month: 7, value: 74 },
-      { month: 8, value: 88, peak: true },
-      { month: 9, value: 69 },
-      { month: 10, value: 100, peak: true },
-      { month: 11, value: 64 },
-      { month: 12, value: 58 },
-    ],
+    sourceLabel: "한국관광공사 · 권역 분배는 자체 추정",
     peakNote:
       "성수기는 5월·8월·10월(국경절) 구간으로 관측됩니다. 6월 무비자 만료 시점 이전 등록을 마치면 하반기 8월·10월 피크 기간 노출에 도움이 될 수 있습니다.",
   };
