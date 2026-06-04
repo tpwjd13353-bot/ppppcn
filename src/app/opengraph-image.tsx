@@ -31,7 +31,7 @@ export default async function OgImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 28%, rgba(0,0,0,0.0) 50%, rgba(0,0,0,0.25) 78%, rgba(0,0,0,0.7) 100%), url(${bgDataUri})`,
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.35) 18%, rgba(0,0,0,0.0) 45%, rgba(0,0,0,0.2) 70%, rgba(0,0,0,0.8) 100%), url(${bgDataUri})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           color: "#FFFFFF",
@@ -49,25 +49,42 @@ export default async function OgImage() {
         >
           <div
             style={{
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: 4,
-              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
             }}
           >
-            PURPLEPEPPER
+            <div
+              style={{
+                width: 6,
+                height: 28,
+                background: "#ff2d2d",
+                boxShadow: "0 0 16px #ff2d2d",
+              }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: 4,
+                color: "#FFFFFF",
+              }}
+            >
+              PURPLEPEPPER
+            </div>
           </div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               padding: "10px 22px",
-              border: "1.6px solid rgba(255,255,255,0.7)",
+              border: "1.6px solid #ff2d2d",
               borderRadius: 9999,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 700,
               letterSpacing: 2,
-              color: "#FFFFFF",
+              color: "#ff5a5a",
+              background: "rgba(255,45,45,0.08)",
             }}
           >
             ★ MEITUAN OFFICIAL PARTNER
@@ -78,21 +95,32 @@ export default async function OgImage() {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
-              fontSize: 80,
+              fontSize: 84,
               fontWeight: 700,
-              lineHeight: 1.15,
+              lineHeight: 1.1,
               letterSpacing: -2,
               color: "#FFFFFF",
             }}
           >
-            중국 관광객, 우리 가게로.
+            중국 관광객,
           </div>
           <div
             style={{
-              marginTop: 22,
-              fontSize: 30,
+              fontSize: 84,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: -2,
+              color: "#ff2d2d",
+            }}
+          >
+            우리 가게로.
+          </div>
+          <div
+            style={{
+              marginTop: 26,
+              fontSize: 28,
               lineHeight: 1.4,
-              color: "rgba(255,255,255,0.85)",
+              color: "rgba(255,255,255,0.78)",
               fontWeight: 500,
             }}
           >
@@ -100,13 +128,13 @@ export default async function OgImage() {
           </div>
           <div
             style={{
-              marginTop: 10,
-              fontSize: 24,
-              color: "rgba(255,255,255,0.7)",
+              marginTop: 8,
+              fontSize: 22,
+              color: "rgba(255,255,255,0.55)",
               fontWeight: 400,
             }}
           >
-            방한 중국 관광객 매장 전환 · 메이투안 본사 정식 인증
+            방한 중국 관광객 매장 전환 · 메이투안 본사 정식 인증 대행사
           </div>
         </div>
 
@@ -119,21 +147,39 @@ export default async function OgImage() {
             width: "100%",
           }}
         >
-          <span
+          <div
             style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: 2,
-              color: "rgba(255,255,255,0.92)",
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
             }}
           >
-            ppppcn.com
-          </span>
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 9999,
+                background: "#ff2d2d",
+                boxShadow: "0 0 12px #ff2d2d",
+              }}
+            />
+            <span
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: 2,
+                color: "rgba(255,255,255,0.95)",
+              }}
+            >
+              ppppcn.com
+            </span>
+          </div>
           <span
             style={{
-              fontSize: 20,
-              color: "rgba(255,255,255,0.7)",
+              fontSize: 18,
+              color: "rgba(255,255,255,0.55)",
               fontWeight: 500,
+              letterSpacing: 0.5,
             }}
           >
             중국 마케팅 전문 대행사
