@@ -62,11 +62,12 @@ function buildUserPrompt(
   // 매칭된 메뉴를 DB 매칭명 기준으로 집계 (사용자 원본 메뉴명은 너무 구체적이라 일반화 어려움).
   // 분류 정보(절대선호/매우선호 등)와 함께 모델에게 전달.
   const matchedAggregated = (() => {
-    const map = new Map<string, { count: number; tier?: string; category?: string }>();
+    type Agg = { count: number; tier?: unknown; category?: unknown };
+    const map = new Map<string, Agg>();
     for (const m of result.details.menu.matches) {
       if (!m.matched) continue;
       const key = m.menuName ?? m.input;
-      const prev = map.get(key) ?? { count: 0 };
+      const prev: Agg = map.get(key) ?? { count: 0 };
       map.set(key, {
         count: prev.count + 1,
         tier: m.단계 ?? prev.tier,
@@ -76,9 +77,11 @@ function buildUserPrompt(
     return Array.from(map.entries())
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 8)
-      .map(([name, v]) =>
-        `${name}(${v.category ?? ""}${v.count > 1 ? `, ${v.count}건 매칭` : ""})`,
-      )
+      .map(([name, v]) => {
+        const cat = v.category != null ? String(v.category) : "";
+        const countStr = v.count > 1 ? `, ${v.count}건 매칭` : "";
+        return `${name}(${cat}${countStr})`;
+      })
       .join(", ");
   })();
   const matchedNames = matchedAggregated || "(없음)";
