@@ -125,6 +125,17 @@ export const analyses = sqliteTable("analyses", {
   scores: text("scores", { mode: "json" }).$type<Record<string, number>>(),
   totalScore: integer("totalScore"),
   reportData: text("reportData", { mode: "json" }),
+  // GPT-4o로 매장별 맞춤 생성된 플랫폼 플레이북 (백그라운드)
+  aiPlaybook: text("aiPlaybook", { mode: "json" }).$type<{
+    weaponHeadline?: string; // 무기 블록 상단 카피
+    weaponSubline?: string;
+    cards: Array<{
+      platformKey: string;
+      desc: string;
+      lockedTeaser: string;
+    }>;
+  }>(),
+  aiPlaybookAt: integer("aiPlaybookAt", { mode: "timestamp_ms" }),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

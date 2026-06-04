@@ -16,6 +16,10 @@ import {
   recordUsage,
   LIMITS,
 } from "@/lib/analyze/rate-limit";
+import { generateAiPlaybook } from "@/lib/analyze/aiPlaybook";
+import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
+import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
+import { extractViralMenus } from "@/lib/analyze/viralMenus";
 
 export async function POST(req: Request) {
   let body: { url?: string };
@@ -103,6 +107,38 @@ export async function POST(req: Request) {
 
   await recordUsage(req, "analyze");
   const after = await checkRateLimit(req, "analyze");
+
+  // AI 플레이북 생성 — fire-and-forget (응답 차단 X). 결과 페이지가 다음 방문 시 사용.
+  (async () => {
+    try {
+      const reportData = { place, result };
+      const [regionRow, loss] = await Promise.all([
+        lookupRegionInsight(place),
+        lookupLossFromReport(reportData),
+      ]);
+      const region = regionRow
+        ? {
+            regionName: regionRow.regionName,
+            regionAnnualVisitors: regionRow.regionAnnualVisitors,
+          }
+        : loss
+          ? {
+              regionName: loss.sigungu,
+              regionAnnualVisitors: loss.annualChineseVisitors,
+            }
+          : null;
+      const viral = extractViralMenus(result.details.menu.matches);
+      await generateAiPlaybook({
+        analysisId: id,
+        place,
+        result,
+        region,
+        viral,
+      });
+    } catch (e) {
+      console.error("[analyze] aiPlaybook trigger failed:", e);
+    }
+  })();
 
   return Response.json({ ok: true, id, place, result, limit: after });
 }

@@ -384,11 +384,11 @@ export default async function ResultPage({
       {viral.count > 0 && platforms.length > 0 && (
         <>
           <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
-            메뉴 자산 활용 여지가 있습니다
+            {row.aiPlaybook?.weaponHeadline || "메뉴 자산 활용 여지가 있습니다"}
           </h2>
           <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-            DB에 등록되지 않은 메뉴 중 비주얼이 강한 음료·디저트는 점수에는 반영되지 않지만
-            중국 플랫폼에서 자주 노출되는 카테고리입니다.
+            {row.aiPlaybook?.weaponSubline ||
+              "DB에 등록되지 않은 메뉴 중 비주얼이 강한 음료·디저트는 점수에는 반영되지 않지만 중국 플랫폼에서 자주 노출되는 카테고리입니다."}
           </p>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -432,42 +432,50 @@ export default async function ResultPage({
               같은 메뉴 자산도 플랫폼마다 활용 방식이 다릅니다. 대표적인 운영 채널 3종의 접근법 일부입니다.
             </p>
 
-            {platforms.map((p) => (
-              <div key={p.platformKey} className="rc-play-row">
-                <div className={`rc-pf-icon rc-pf-${p.platformKey}`}>
-                  {p.icon || "•"}
-                </div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[14px] font-bold">{p.nameKo}</span>
-                    {p.nameCn && (
-                      <span className="text-[12px] text-[var(--rc-txt3)]">
-                        {p.nameCn}
-                      </span>
+            {platforms.map((p) => {
+              const aiCard = row.aiPlaybook?.cards?.find(
+                (c) => c.platformKey === p.platformKey,
+              );
+              const desc = aiCard?.desc
+                ? aiCard.desc
+                : p.descTemplate
+                  ? applyViralTemplate(p.descTemplate, viral)
+                  : "";
+              const teaser = aiCard?.lockedTeaser || p.lockedTeaser || "";
+              return (
+                <div key={p.platformKey} className="rc-play-row">
+                  <div className={`rc-pf-icon rc-pf-${p.platformKey}`}>
+                    {p.icon || "•"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[14px] font-bold">{p.nameKo}</span>
+                      {p.nameCn && (
+                        <span className="text-[12px] text-[var(--rc-txt3)]">
+                          {p.nameCn}
+                        </span>
+                      )}
+                      {p.roleTag && (
+                        <span className="rounded bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-[11px] text-[var(--rc-amber)]">
+                          {p.roleTag}
+                        </span>
+                      )}
+                    </div>
+                    {desc && (
+                      <p className="mt-2 text-[13px] leading-[1.6] text-[var(--rc-txt2)]">
+                        {renderTemplate(desc, viral)}
+                      </p>
                     )}
-                    {p.roleTag && (
-                      <span className="rounded bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-[11px] text-[var(--rc-amber)]">
-                        {p.roleTag}
-                      </span>
+                    {teaser && (
+                      <p className="mt-2 flex items-center gap-1.5 text-[12px] text-[var(--rc-txt3)]">
+                        <Lock className="h-3 w-3 text-[var(--rc-red)]" />
+                        {teaser}
+                      </p>
                     )}
                   </div>
-                  {p.descTemplate && (
-                    <p className="mt-2 text-[13px] leading-[1.6] text-[var(--rc-txt2)]">
-                      {renderTemplate(
-                        applyViralTemplate(p.descTemplate, viral),
-                        viral,
-                      )}
-                    </p>
-                  )}
-                  {p.lockedTeaser && (
-                    <p className="mt-2 flex items-center gap-1.5 text-[12px] text-[var(--rc-txt3)]">
-                      <Lock className="h-3 w-3 text-[var(--rc-red)]" />
-                      {p.lockedTeaser}
-                    </p>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <div className="rc-play-foot">
               <p className="text-[13px] text-[var(--rc-txt2)]">
@@ -486,12 +494,14 @@ export default async function ResultPage({
         </>
       )}
 
-      {/* 8. 손실 게이팅 (비회원만 잠금) */}
+      {/* 8. 손실 게이팅 (비회원은 blur + 자물쇠) */}
       <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
         잠재 손실액과 회복 시나리오
       </h2>
       <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-        상세 산출은 가입 후 전체 보고서에서 확인하실 수 있습니다.
+        {isMember
+          ? "위치·메뉴·상권 데이터 기반 보수적 추정. 실제 결과는 운영 조건에 따라 다를 수 있습니다."
+          : "상세 산출은 가입 후 전체 보고서에서 확인하실 수 있습니다."}
       </p>
 
       <div className="relative mt-5 overflow-hidden rounded-[18px] border border-[var(--rc-lineS)]">
@@ -502,10 +512,34 @@ export default async function ResultPage({
           aria-hidden={!isMember}
         >
           <h4 className="text-[16px] font-bold">연간 잠재 매출 손실 추정</h4>
-          <LossRow label="중국 플랫폼 미노출로 인한 월 추정 손실" />
-          <LossRow label="음료·디저트 미매칭 바이럴 미활용 손실" />
-          <LossRow label="연간 환산 누적 손실 (보수적 시나리오)" />
-          <LossRow label="등록 후 90일 예상 회복 매출" positive />
+          {loss ? (
+            <>
+              <LossRow
+                label="연간 잠재 손실 (보수 추정 하한)"
+                amount={loss.annualLossKRWLow}
+              />
+              <LossRow
+                label="연간 잠재 손실 (보수 추정 상한)"
+                amount={loss.annualLossKRWHigh}
+              />
+              <LossRow
+                label="월 평균 환산 (상한 기준)"
+                amount={Math.round(loss.annualLossKRWHigh / 12)}
+              />
+              <LossRow
+                label="등록 후 90일 예상 회복 매출 (보수)"
+                amount={Math.round(loss.annualLossKRWLow * 0.25)}
+                positive
+              />
+            </>
+          ) : (
+            <>
+              <LossRow label="중국 플랫폼 미노출로 인한 월 추정 손실" />
+              <LossRow label="음료·디저트 미매칭 바이럴 미활용 손실" />
+              <LossRow label="연간 환산 누적 손실 (보수적 시나리오)" />
+              <LossRow label="등록 후 90일 예상 회복 매출" positive />
+            </>
+          )}
         </div>
 
         {!isMember && (
@@ -780,7 +814,21 @@ function DataCard({
   );
 }
 
-function LossRow({ label, positive }: { label: string; positive?: boolean }) {
+function LossRow({
+  label,
+  amount,
+  positive,
+}: {
+  label: string;
+  amount?: number;
+  positive?: boolean;
+}) {
+  const value =
+    typeof amount === "number"
+      ? `${positive ? "+ " : ""}₩ ${amount.toLocaleString()}`
+      : positive
+        ? "+ ₩ 0,000,000"
+        : "₩ 0,000,000";
   return (
     <div className="flex items-center justify-between border-b border-[var(--rc-lineS)] py-3 text-[14px] text-[var(--rc-txt2)] last:border-b-0">
       <span>{label}</span>
@@ -789,7 +837,7 @@ function LossRow({ label, positive }: { label: string; positive?: boolean }) {
           positive ? "text-[var(--rc-green)]" : "text-[var(--rc-red)]"
         }`}
       >
-        {positive ? "+ ₩ 0,000,000" : "₩ 0,000,000"}
+        {value}
       </b>
     </div>
   );
