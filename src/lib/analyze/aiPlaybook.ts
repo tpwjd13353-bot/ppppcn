@@ -59,9 +59,32 @@ function buildUserPrompt(
   viral: ViralExtract,
   platforms: PlatformSeed[],
 ): string {
-  const matchedNames = result.details.menu.matches
+  // 매칭된 메뉴를 DB 매칭명 기준으로 집계 (사용자 원본 메뉴명은 너무 구체적이라 일반화 어려움).
+  // 분류 정보(절대선호/매우선호 등)와 함께 모델에게 전달.
+  const matchedAggregated = (() => {
+    const map = new Map<string, { count: number; tier?: string; category?: string }>();
+    for (const m of result.details.menu.matches) {
+      if (!m.matched) continue;
+      const key = m.menuName ?? m.input;
+      const prev = map.get(key) ?? { count: 0 };
+      map.set(key, {
+        count: prev.count + 1,
+        tier: m.단계 ?? prev.tier,
+        category: m.분류 ?? prev.category,
+      });
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 8)
+      .map(([name, v]) =>
+        `${name}(${v.category ?? ""}${v.count > 1 ? `, ${v.count}건 매칭` : ""})`,
+      )
+      .join(", ");
+  })();
+  const matchedNames = matchedAggregated || "(없음)";
+  const originalSample = result.details.menu.matches
     .filter((m) => m.matched)
-    .slice(0, 8)
+    .slice(0, 5)
     .map((m) => m.input)
     .join(", ");
   const unmatchedNames = result.details.menu.matches
@@ -90,12 +113,20 @@ function buildUserPrompt(
 [지역]
 ${region ? `- 권역명: ${region.regionName}\n- 권역 연간 방문 추정: ${region.regionAnnualVisitors?.toLocaleString() ?? "—"}명` : "- 권역 데이터 없음"}
 
-[메뉴 — 매칭]
-${matchedNames || "(없음)"}
+[메뉴 — 매칭 (DB 카테고리 일반화 — 카피에 이 이름을 사용)]
+${matchedNames}
+
+[원본 메뉴명 (참고 — 카피에는 일반화된 위 카테고리 사용 권장)]
+${originalSample || "(없음)"}
 
 [메뉴 — 미매칭(시각 바이럴 자산 후보)]
 ${unmatchedNames || "(없음)"}
 음료·디저트 자동 추출: ${viral.count}종 → 예시 "${viral.injection}"
+
+[카피 작성 시 유의]
+- 메뉴 이름은 일반화된 카테고리명(예: "삼겹살", "치킨", "짬뽕")을 사용하세요.
+- 사용자 입력 원본명(예: "생고기 한접시(삼겹살&목살)700g")은 그대로 노출하지 마세요.
+- 매장 카테고리·분위기를 파악해 자연스러운 마케팅 멘트로 작성하세요.
 
 [플랫폼 카드 3종 — 각각 desc + lockedTeaser 작성]
 ${platformList}

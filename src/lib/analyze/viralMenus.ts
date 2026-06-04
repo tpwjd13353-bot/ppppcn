@@ -94,13 +94,23 @@ export interface TopMenusExtract {
   injection: string; // {{top_menus}} 자리 치환용
 }
 
-/** 매장의 매칭된 상위 메뉴 (점수 ≥ 70) 추출 → {{top_menus}} 자리 치환용 */
+/** 매장의 매칭된 상위 메뉴 (점수 ≥ 70) 추출 → {{top_menus}} 자리 치환용.
+ *  사용자 입력 메뉴명("생고기 한접시(삼겹살&목살)700g") 대신
+ *  DB 매칭명("삼겹살")을 사용해 일반화된 자연스러운 카피 생성. 중복 제거. */
 export function extractTopMenus(matches: MenuMatch[]): TopMenusExtract {
   const matched = matches
     .filter((m) => m.matched && typeof m.score === "number" && (m.score ?? 0) >= 70)
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    .slice(0, 3);
-  const names = matched.map((m) => m.input);
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  // DB 매칭명 우선, 없으면 원본. 중복 제거 후 상위 3개.
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const m of matched) {
+    const name = m.menuName ?? m.input;
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    names.push(name);
+    if (names.length >= 3) break;
+  }
   let injection = names.join(" · ");
   if (!injection) injection = "매장 시그니처 메뉴";
   if (injection.length > 40) injection = injection.slice(0, 38) + "…";
