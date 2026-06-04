@@ -129,6 +129,18 @@ export const analyses = sqliteTable("analyses", {
   aiPlaybook: text("aiPlaybook", { mode: "json" }).$type<{
     weaponHeadline?: string; // 무기 블록 상단 카피
     weaponSubline?: string;
+    weaponHotMenu?: {
+      label?: string;
+      menuName?: string;
+      score?: number;
+      tagline?: string;
+    };
+    weaponMz?: {
+      label?: string;
+      lineA?: string;
+      lineB?: string;
+      tagline?: string;
+    };
     cards: Array<{
       platformKey: string;
       desc: string;

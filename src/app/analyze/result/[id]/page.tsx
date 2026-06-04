@@ -394,48 +394,69 @@ export default async function ResultPage({
         </>
       )}
 
-      {/* 7. 무기 블록 — 음료/디저트 미매칭 있을 때만 */}
-      {viral.count > 0 && (
-        <>
-          <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
-            {row.aiPlaybook?.weaponHeadline || "메뉴 자산 활용 여지가 있습니다"}
-          </h2>
-          <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-            {row.aiPlaybook?.weaponSubline ||
-              "DB에 등록되지 않은 메뉴 중 비주얼이 강한 음료·디저트는 점수에는 반영되지 않지만 중국 플랫폼에서 자주 노출되는 카테고리입니다."}
-          </p>
+      {/* 7. 무기 블록 — 매장 최고점 메뉴 + 매장별 채널 효과 */}
+      {(topMenus.count > 0 || viral.count > 0) && (() => {
+        // 최고점 매칭 메뉴 (DB명, 점수, 분류)
+        const topMatched = details.menu.matches
+          .filter((m) => m.matched && typeof m.score === "number")
+          .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0];
+        const hotMenu = row.aiPlaybook?.weaponHotMenu?.menuName ||
+          topMatched?.menuName || topMatched?.input || "시그니처 메뉴";
+        const hotScore = row.aiPlaybook?.weaponHotMenu?.score ?? topMatched?.score ?? null;
+        const hotLabel = row.aiPlaybook?.weaponHotMenu?.label || "중국인 관광객 상대로 터지는 메뉴";
+        const hotTagline = row.aiPlaybook?.weaponHotMenu?.tagline || "= 샤오홍슈에서 사진 터지는 메뉴";
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rc-card-purple">
-              <p className="text-[13px] font-medium text-[var(--rc-txt2)]">
-                음료·디저트 미매칭 메뉴
-              </p>
-              <p className="mt-2 text-[36px] font-black leading-none text-[var(--rc-purple)]">
-                {viral.count}종
-              </p>
-              <p className="mt-2 text-[13px] text-[var(--rc-txt2)]">
-                점수 산정에서 제외됨
-              </p>
-              <p className="mt-1 text-[15px] font-bold text-[var(--rc-purple)]">
-                = 시각 콘텐츠로 노출 가능한 자산
-              </p>
+        const mzLabel = row.aiPlaybook?.weaponMz?.label || "중국 MZ가 원하는 건";
+        const mzLineA = row.aiPlaybook?.weaponMz?.lineA || `${hotMenu}의`;
+        const mzLineB = row.aiPlaybook?.weaponMz?.lineB || "굽는 순간·자르는 순간이 핵심입니다";
+        const mzTagline = row.aiPlaybook?.weaponMz?.tagline || "비주얼 = 무료 바이럴 광고";
+
+        return (
+          <>
+            <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
+              {row.aiPlaybook?.weaponHeadline || "정작 최고의 무기를 못 쓰고 있습니다"}
+            </h2>
+            <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
+              {row.aiPlaybook?.weaponSubline ||
+                "점수에서 누락된 메뉴가 사실은 가장 강력한 바이럴 자산입니다."}
+            </p>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rc-card-purple">
+                <p className="text-[13px] font-medium text-[var(--rc-txt2)]">
+                  {hotLabel}
+                </p>
+                <p className="mt-2 text-[36px] font-black leading-none text-[var(--rc-purple)]">
+                  {hotMenu}
+                </p>
+                {typeof hotScore === "number" && (
+                  <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
+                    DB 매칭 점수{" "}
+                    <span className="font-bold text-[var(--rc-purple)]">
+                      {hotScore}점
+                    </span>
+                  </p>
+                )}
+                <p className="mt-2 text-[15px] font-bold text-[var(--rc-purple)]">
+                  {hotTagline}
+                </p>
+              </div>
+              <div className="rc-card-sm">
+                <p className="text-[13px] text-[var(--rc-txt2)]">{mzLabel}</p>
+                <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
+                  {mzLineA}
+                </p>
+                <p className="mt-1 text-[18px] font-bold text-[var(--rc-txt)] leading-snug">
+                  {mzLineB}
+                </p>
+                <p className="mt-2 text-[13px] text-[var(--rc-txt2)]">
+                  {mzTagline}
+                </p>
+              </div>
             </div>
-            <div className="rc-card-sm">
-              <p className="text-[13px] text-[var(--rc-txt2)]">
-                중국 MZ가 SNS에 올리는 것은
-              </p>
-              <p className="mt-2 text-[16px] font-bold">
-                메인 메뉴가 아니라
-                <br />
-                컬러풀한 음료·디저트 한 컷일 때가 많습니다
-              </p>
-              <p className="mt-2 text-[13px] text-[var(--rc-txt2)]">
-                비주얼 콘텐츠가 자연 노출을 만드는 구조로 알려져 있습니다.
-              </p>
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        );
+      })()}
 
       {/* 7-2. 플랫폼 플레이북 — 음료 없어도 모든 매장에 노출 */}
       {platforms.length > 0 && (
