@@ -132,7 +132,18 @@ export default async function ResultPage({
   const hasMenuRows = details.menu.matches.length > 0;
 
   return (
-    <main className="result-scope mx-auto w-full max-w-[920px] px-5 py-12 md:py-16">
+    <main className="result-scope relative mx-auto w-full max-w-[920px] px-5 py-12 md:py-16">
+      {/* 워터마크 — 캡쳐·스크린샷 보호. 클릭·스크롤 방해 X */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 select-none overflow-hidden"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='320' viewBox='0 0 600 320'><g fill='%23ffffff' fill-opacity='0.045' font-family='Pretendard,sans-serif' font-weight='800' font-size='34'><text x='40' y='90' transform='rotate(-22 40 90)'>PURPLEPEPPER · ppppcn.com</text><text x='40' y='250' transform='rotate(-22 40 250)'>PURPLEPEPPER · ppppcn.com</text></g></svg>\")",
+          backgroundRepeat: "repeat",
+        }}
+      />
+      <div className="relative z-10">
       <Link
         href="/analyze"
         className="inline-flex items-center gap-1.5 text-sm text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
@@ -747,6 +758,18 @@ export default async function ResultPage({
           </div>
         </section>
       )}
+
+      {/* 보고서 메타 워터마크 — 추적·식별용 */}
+      <div className="mt-12 border-t border-[var(--rc-lineS)] pt-5 text-[10px] leading-relaxed text-[var(--rc-txt3)]">
+        <p>
+          본 분석 결과는 PURPLEPEPPER(ppppcn.com)에서 생성되었으며, 무단 복제·배포·재가공을 금합니다.
+        </p>
+        <p className="mt-1 font-mono">
+          REPORT ID: {id} · ISSUED: {new Date(row.createdAt).toISOString()}
+          {session?.user?.email && ` · UID: ${session.user.email}`}
+        </p>
+      </div>
+      </div>{/* /relative z-10 */}
     </main>
   );
 }

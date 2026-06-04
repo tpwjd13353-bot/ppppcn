@@ -3,6 +3,7 @@ import { Page, View, Text, Link } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing } from "./styles";
 import { page3Stage, type Scenario } from "./scenario";
 import { BackgroundImage } from "./BackgroundImage";
+import { Watermark } from "./Watermark";
 import type { NaverPlaceData } from "@/lib/analyze/naver";
 
 interface Props {
@@ -23,6 +24,7 @@ export function PdfPage3({
   return (
     <Page size="A4" style={styles.page}>
       <BackgroundImage />
+      <Watermark />
       <View style={styles.pageInner}>
       {/* 상단 */}
       <View

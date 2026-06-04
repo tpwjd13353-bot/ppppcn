@@ -3,6 +3,7 @@ import { Page, View, Text } from "@react-pdf/renderer";
 import { styles, colors, fontSize, spacing } from "./styles";
 import { page1Conclusion, lossBoxHeading, type Scenario } from "./scenario";
 import { BackgroundImage } from "./BackgroundImage";
+import { Watermark } from "./Watermark";
 import {
   formatLossKRW,
   type LossEstimate,
@@ -43,6 +44,7 @@ export function PdfPage1({
   return (
     <Page size="A4" style={styles.page}>
       <BackgroundImage />
+      <Watermark reportId={reportId} />
       <View style={styles.pageInner}>
       {/* ===== 상단 헤더 ===== */}
       <View
