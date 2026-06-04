@@ -8,7 +8,7 @@ import { Download, LogOut, Menu, User, X } from "lucide-react";
 import { signOutAction } from "@/lib/auth-actions";
 
 const NAV_ITEMS = [
-  { href: "/analyze", label: "Analyze", highlight: true },
+  { href: "/analyze", label: "AI 분석", highlight: true },
   { href: "/services", label: "Services" },
   { href: "/insights", label: "Insights" },
   { href: "/about", label: "About" },
