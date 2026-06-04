@@ -24,12 +24,17 @@ import { ScoreGauge } from "./ScoreGauge";
 import { MenuTable } from "./MenuTable";
 import { auth } from "@/lib/auth";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
+import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
 import { extractViralMenus, applyViralTemplate } from "@/lib/analyze/viralMenus";
 import {
   buildMonthlyTrend,
   formatPersons,
 } from "@/lib/analyze/monthlyDistribution";
 import { pickScenario, page2GapLine } from "@/lib/pdf/scenario";
+
+// 한국관광공사 2025 방한 중국 관광객 통계 (전국 공통값)
+const KTO_INBOUND_TOTAL_2025 = 5_530_000;
+const KTO_INBOUND_YOY_2025 = "+15.4%";
 
 export const dynamic = "force-dynamic";
 
@@ -88,7 +93,33 @@ export default async function ResultPage({
   const { store, marketing, details, conclusion, consultation } = result;
   const gap = store.score - marketing.score;
 
-  const region = await lookupRegionInsight(place);
+  // 1순위: 사용자 수기 등록 region_insight (28개 외 지역용)
+  // 2순위: region_stats.csv 자동 매핑 (28개 시군구 — lossLookup 결과 활용)
+  const [regionRow, loss] = await Promise.all([
+    lookupRegionInsight(place),
+    lookupLossFromReport(data),
+  ]);
+  const region = regionRow
+    ? {
+        regionName: regionRow.regionName,
+        regionAnnualVisitors: regionRow.regionAnnualVisitors,
+        inboundTotal: regionRow.inboundTotal ?? KTO_INBOUND_TOTAL_2025,
+        inboundYoy: regionRow.inboundYoy ?? KTO_INBOUND_YOY_2025,
+        isEstimate: regionRow.isEstimate,
+        sourceLabel: regionRow.sourceLabel,
+        peakNote: regionRow.peakNote,
+      }
+    : loss
+      ? {
+          regionName: loss.sigungu,
+          regionAnnualVisitors: loss.annualChineseVisitors,
+          inboundTotal: KTO_INBOUND_TOTAL_2025,
+          inboundYoy: KTO_INBOUND_YOY_2025,
+          isEstimate: true,
+          sourceLabel: "한국관광공사 외래관광객 통계 기반 자체 추정",
+          peakNote: null as string | null,
+        }
+      : null;
   const viral = extractViralMenus(details.menu.matches);
   const scenario = pickScenario(result);
   const scenarioLine = page2GapLine(scenario);
