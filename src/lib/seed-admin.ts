@@ -20,19 +20,32 @@ export async function seedAdmin(): Promise<void> {
 
   const { db, schema } = await import("./db");
 
-  // 전체 데이터 리셋 (옵션)
-  // 외래키 참조하는 자식 테이블의 userId를 먼저 NULL로 풀고 user를 삭제해야
-  // SQLITE_CONSTRAINT_FOREIGNKEY 위반이 발생하지 않음. analyses·usage_log row 자체는 유지.
+  // 전체 데이터 리셋 (멱등 보장)
+  // 환경변수 ADMIN_RESET_ALL=true가 켜져 있어도, 이미 admin user가 있으면 reset skip.
+  // → 매 부팅마다 admin이 새 id로 다시 만들어져 옛 세션 JWT와 mismatch하는 문제 방지.
+  // → 환경변수 끄지 않아도 한 번만 reset 트리거됨.
   if (process.env.ADMIN_RESET_ALL === "true") {
-    await db.update(schema.analyses).set({ userId: null });
-    await db.update(schema.usageLog).set({ userId: null });
-    await db.delete(schema.sessions);
-    await db.delete(schema.accounts);
-    await db.delete(schema.phoneCodes);
-    await db.delete(schema.users);
-    console.log(
-      "[seed-admin] reset: cleared sessions/accounts/phoneCodes/users (analyses·usage_log userId set to null)",
-    );
+    const adminExists = await db
+      .select({ id: schema.users.id })
+      .from(schema.users)
+      .where(eq(schema.users.email, seedEmail))
+      .limit(1);
+    if (adminExists.length === 0) {
+      // 첫 부팅 — 자식 테이블 userId 먼저 NULL로 풀고 user 삭제 (외래키 위반 방지)
+      await db.update(schema.analyses).set({ userId: null });
+      await db.update(schema.usageLog).set({ userId: null });
+      await db.delete(schema.sessions);
+      await db.delete(schema.accounts);
+      await db.delete(schema.phoneCodes);
+      await db.delete(schema.users);
+      console.log(
+        "[seed-admin] reset done: cleared sessions/accounts/phoneCodes/users",
+      );
+    } else {
+      console.log(
+        "[seed-admin] reset skipped — admin user already exists (id preserved)",
+      );
+    }
   }
 
   const passwordHash = await bcrypt.hash(seedPassword, 10);
