@@ -2,7 +2,13 @@
 // 한국관광공사 통상 패턴 기반 — 5/8/10월 피크 구조.
 // 권역 연간 방문 추정값을 받아 월별 인원수 + 상대 막대 높이(0~100)로 분배.
 
-const DEFAULT_MONTHLY_RATIO = [
+interface MonthlyRatio {
+  month: number;
+  ratio: number;
+  peak?: boolean;
+}
+
+const DEFAULT_MONTHLY_RATIO: MonthlyRatio[] = [
   { month: 1, ratio: 0.044 },
   { month: 2, ratio: 0.06 },
   { month: 3, ratio: 0.055 },
@@ -15,7 +21,7 @@ const DEFAULT_MONTHLY_RATIO = [
   { month: 10, ratio: 0.115, peak: true },
   { month: 11, ratio: 0.074 },
   { month: 12, ratio: 0.067 },
-] as const;
+];
 
 export interface MonthlyTrendPoint {
   month: number;
