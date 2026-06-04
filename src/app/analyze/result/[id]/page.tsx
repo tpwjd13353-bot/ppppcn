@@ -327,13 +327,22 @@ export default async function ResultPage({
                   <div
                     key={m.month}
                     className="flex flex-1 flex-col items-center gap-2"
+                    style={{ height: "100%" }}
                   >
-                    <div className="flex w-full flex-1 items-end">
+                    <div
+                      className="flex w-full items-end"
+                      style={{ flex: 1, minHeight: 0 }}
+                    >
                       <div
-                        className={`w-full rounded-t-[5px] ${
-                          m.peak ? "rc-bar-peak" : "rc-bar"
-                        }`}
-                        style={{ height: `${m.value}%` }}
+                        style={{
+                          width: "100%",
+                          height: `${Math.max(m.value, 4)}%`,
+                          borderTopLeftRadius: 5,
+                          borderTopRightRadius: 5,
+                          background: m.peak
+                            ? "linear-gradient(180deg, #fbbf24, #854f0b)"
+                            : "linear-gradient(180deg, #ff2d2d, #7a1010)",
+                        }}
                         title={`${m.month}월 약 ${formatPersons(m.persons)}`}
                       />
                     </div>
@@ -380,8 +389,8 @@ export default async function ResultPage({
         </>
       )}
 
-      {/* 7. 무기 + 플랫폼 플레이북 — 미매칭 음료/디저트 있고 플랫폼 데이터 있을 때만 */}
-      {viral.count > 0 && platforms.length > 0 && (
+      {/* 7. 무기 블록 — 음료/디저트 미매칭 있을 때만 */}
+      {viral.count > 0 && (
         <>
           <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
             {row.aiPlaybook?.weaponHeadline || "메뉴 자산 활용 여지가 있습니다"}
@@ -420,6 +429,24 @@ export default async function ResultPage({
               </p>
             </div>
           </div>
+        </>
+      )}
+
+      {/* 7-2. 플랫폼 플레이북 — 음료 없어도 모든 매장에 노출 */}
+      {platforms.length > 0 && (
+        <>
+          {viral.count === 0 && (
+            <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
+              {row.aiPlaybook?.weaponHeadline ||
+                "중국 플랫폼별 활용 전략"}
+            </h2>
+          )}
+          {viral.count === 0 && (
+            <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
+              {row.aiPlaybook?.weaponSubline ||
+                "샤오홍슈·따종디엔핑·도우인 — 같은 매장도 채널마다 활용 방식이 다릅니다."}
+            </p>
+          )}
 
           <div className="rc-play mt-5">
             <div className="flex items-center gap-2">

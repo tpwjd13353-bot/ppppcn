@@ -112,11 +112,6 @@ export async function generateAiPlaybook(params: {
     console.warn("[ai-playbook] OPENAI_API_KEY 미설정 — skip");
     return;
   }
-  if (params.viral.count === 0) {
-    // 음료/디저트 미매칭 없으면 무기 블록 자체 의미 약함 — skip
-    return;
-  }
-
   const platforms = await db
     .select({
       platformKey: schema.platformPlaybook.platformKey,
