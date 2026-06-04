@@ -7,4 +7,10 @@ export async function register() {
   } catch (err) {
     console.error("[instrumentation] seedAdmin failed:", err);
   }
+  try {
+    const { seedRegionPlatform } = await import("./lib/seed-region-platform");
+    await seedRegionPlatform();
+  } catch (err) {
+    console.error("[instrumentation] seedRegionPlatform failed:", err);
+  }
 }
