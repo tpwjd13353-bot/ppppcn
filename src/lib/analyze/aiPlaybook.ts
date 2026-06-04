@@ -132,7 +132,7 @@ export async function generateAiPlaybook(params: {
 
   try {
     const completion = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       temperature: 0.7,
       messages: [
