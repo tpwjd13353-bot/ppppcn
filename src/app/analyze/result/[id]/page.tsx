@@ -461,28 +461,22 @@ export default async function ResultPage({
       {/* 7-2. 플랫폼 플레이북 — 음료 없어도 모든 매장에 노출 */}
       {platforms.length > 0 && (
         <>
-          {viral.count === 0 && (
-            <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
-              {row.aiPlaybook?.weaponHeadline ||
-                "중국 플랫폼별 활용 전략"}
-            </h2>
-          )}
-          {viral.count === 0 && (
-            <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-              {row.aiPlaybook?.weaponSubline ||
-                "샤오홍슈·따종디엔핑·도우인 — 같은 매장도 채널마다 활용 방식이 다릅니다."}
-            </p>
-          )}
+          <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
+            각 플랫폼에서 우리 가게는 어떻게 보일까
+          </h2>
+          <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
+            샤오홍슈·따종디엔핑·도우인 — 같은 메뉴라도 채널별로 노출되는 방식이 달라요.
+          </p>
 
           <div className="rc-play mt-5">
             <div className="flex items-center gap-2">
-              <h4 className="text-[16px] font-bold">🎯 플랫폼별 활용 전략 맛보기</h4>
+              <h4 className="text-[16px] font-bold">📊 플랫폼별 노출 예상</h4>
               <span className="rounded-full border border-[var(--rc-purple-line)] px-2.5 py-0.5 text-[11px] text-[var(--rc-purple)]">
                 PURPLEPEPPER PLAYBOOK
               </span>
             </div>
             <p className="mt-2 text-[13px] leading-[1.6] text-[var(--rc-txt2)]">
-              같은 메뉴 자산도 플랫폼마다 활용 방식이 다릅니다. 대표적인 운영 채널 3종의 접근법 일부입니다.
+              이 매장 메뉴를 기준으로 각 채널에서의 노출·검색 방식을 정리한 분석입니다.
             </p>
 
             {platforms.map((p) => {
@@ -547,22 +541,18 @@ export default async function ResultPage({
         </>
       )}
 
-      {/* 8. 손실 게이팅 (비회원은 blur + 자물쇠) */}
+      {/* 8. 손실 게이팅 — 회원·관리자도 blur + 자물쇠로 통일. PDF 보고서로 유도 */}
       <h2 className="mt-12 font-heading text-[22px] font-black tracking-tight">
         잠재 손실액과 회복 시나리오
       </h2>
       <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-        {isMember
-          ? "위치·메뉴·상권 데이터 기반 보수적 추정. 실제 결과는 운영 조건에 따라 다를 수 있습니다."
-          : "상세 산출은 가입 후 전체 보고서에서 확인하실 수 있습니다."}
+        위치·메뉴·상권 데이터 기반 보수적 추정 — 정확한 금액과 회복 시나리오는 PDF 보고서에서 확인하실 수 있습니다.
       </p>
 
       <div className="relative mt-5 overflow-hidden rounded-[18px] border border-[var(--rc-lineS)]">
         <div
-          className={`p-8 ${
-            isMember ? "" : "pointer-events-none select-none opacity-50 blur-[6px]"
-          }`}
-          aria-hidden={!isMember}
+          className="p-8 pointer-events-none select-none opacity-50 blur-[6px]"
+          aria-hidden
         >
           <h4 className="text-[16px] font-bold">연간 잠재 매출 손실 추정</h4>
           {loss ? (
@@ -595,37 +585,47 @@ export default async function ResultPage({
           )}
         </div>
 
-        {!isMember && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(20,20,22,0.7),rgba(10,10,11,0.95))] p-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--rc-red)] bg-[rgba(255,45,45,0.12)]">
-              <ShieldAlert className="h-5 w-5 text-[var(--rc-red)]" />
-            </div>
-            <h4 className="mt-4 text-[19px] font-bold">
-              이 매장의 잠재 손실 추정과 회복 시나리오
-            </h4>
-            <p className="mt-2 max-w-[440px] text-[14px] leading-[1.6] text-[var(--rc-txt2)]">
-              위치·메뉴·상권 데이터를 바탕으로 산출한{" "}
-              <b>연간 잠재 손실액과 회복 시나리오</b>는 전체 보고서에 담겨 있습니다.
-              지금 무료로 확인하실 수 있습니다.
-            </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {["연간 손실액 추정", "90일 회복 시나리오", "단계별 액션 가이드"].map(
-                (t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-[var(--rc-line)] bg-[var(--rc-surface2)] px-3.5 py-1.5 text-[12px] text-[var(--rc-txt2)]"
-                  >
-                    {t}
-                  </span>
-                ),
-              )}
-            </div>
-            <Link href="#cta" className="rc-btn-red mt-6">
-              <Lock className="h-4 w-4" />
-              무료로 전체 결과 보기
-            </Link>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(20,20,22,0.7),rgba(10,10,11,0.95))] p-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--rc-red)] bg-[rgba(255,45,45,0.12)]">
+            <ShieldAlert className="h-5 w-5 text-[var(--rc-red)]" />
           </div>
-        )}
+          <h4 className="mt-4 text-[19px] font-bold">
+            이 매장의 잠재 손실 추정과 회복 시나리오
+          </h4>
+          <p className="mt-2 max-w-[440px] text-[14px] leading-[1.6] text-[var(--rc-txt2)]">
+            위치·메뉴·상권 데이터로 산출한{" "}
+            <b>연간 잠재 손실액과 회복 시나리오</b>는 PDF 보고서에 담겨 있습니다.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {["연간 손실액 추정", "90일 회복 시나리오", "단계별 액션 가이드"].map(
+              (t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-[var(--rc-line)] bg-[var(--rc-surface2)] px-3.5 py-1.5 text-[12px] text-[var(--rc-txt2)]"
+                >
+                  {t}
+                </span>
+              ),
+            )}
+          </div>
+          {isMember ? (
+            <a
+              href={`/api/analyze/${id}/pdf`}
+              className="rc-btn-red mt-6"
+            >
+              <Download className="h-4 w-4" />
+              PDF 보고서 다운로드
+            </a>
+          ) : (
+            <Link
+              href={`/login?callbackUrl=/analyze/result/${id}`}
+              className="rc-btn-red mt-6"
+            >
+              <Lock className="h-4 w-4" />
+              3초 가입하고 PDF 받기
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* 9. 지금 시작해야 하는 이유 */}
