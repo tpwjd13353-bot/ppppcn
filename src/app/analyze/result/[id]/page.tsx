@@ -25,7 +25,11 @@ import { MenuTable } from "./MenuTable";
 import { auth } from "@/lib/auth";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
 import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
-import { extractViralMenus, applyViralTemplate } from "@/lib/analyze/viralMenus";
+import {
+  extractViralMenus,
+  extractTopMenus,
+  applyAllTemplates,
+} from "@/lib/analyze/viralMenus";
 import {
   buildMonthlyTrend,
   formatPersons,
@@ -121,6 +125,7 @@ export default async function ResultPage({
         }
       : null;
   const viral = extractViralMenus(details.menu.matches);
+  const topMenus = extractTopMenus(details.menu.matches);
   const scenario = pickScenario(result);
   const scenarioLine = page2GapLine(scenario);
 
@@ -466,7 +471,7 @@ export default async function ResultPage({
               const desc = aiCard?.desc
                 ? aiCard.desc
                 : p.descTemplate
-                  ? applyViralTemplate(p.descTemplate, viral)
+                  ? applyAllTemplates(p.descTemplate, viral, topMenus)
                   : "";
               const teaser = aiCard?.lockedTeaser || p.lockedTeaser || "";
               return (
@@ -490,7 +495,7 @@ export default async function ResultPage({
                     </div>
                     {desc && (
                       <p className="mt-2 text-[13px] leading-[1.6] text-[var(--rc-txt2)]">
-                        {renderTemplate(desc, viral)}
+                        {renderTemplate(desc, viral, topMenus)}
                       </p>
                     )}
                     {teaser && (
@@ -899,17 +904,40 @@ function WhyItem({
   );
 }
 
-function renderTemplate(text: string, viral: { injection: string }): React.ReactNode {
-  if (!text.includes(viral.injection)) return text;
-  const parts = text.split(viral.injection);
-  return parts.flatMap((p, i) =>
-    i === 0
-      ? [p]
-      : [
-          <span key={i} className="font-bold text-[var(--rc-purple)]">
-            {viral.injection}
-          </span>,
-          p,
-        ],
+function renderTemplate(
+  text: string,
+  viral: { injection: string },
+  top?: { injection: string },
+): React.ReactNode {
+  // 두 inject 문자열 다 강조. top 우선.
+  const tokens = [top?.injection, viral.injection].filter(
+    (v): v is string => !!v,
   );
+  if (tokens.length === 0) return text;
+  // 가장 긴 토큰 우선 매칭 (overlap 방지)
+  tokens.sort((a, b) => b.length - a.length);
+  let nodes: React.ReactNode[] = [text];
+  let key = 0;
+  for (const token of tokens) {
+    const next: React.ReactNode[] = [];
+    for (const node of nodes) {
+      if (typeof node !== "string" || !node.includes(token)) {
+        next.push(node);
+        continue;
+      }
+      const parts = node.split(token);
+      parts.forEach((p, i) => {
+        if (i > 0) {
+          next.push(
+            <span key={`hl-${key++}`} className="font-bold text-[var(--rc-purple)]">
+              {token}
+            </span>,
+          );
+        }
+        if (p) next.push(p);
+      });
+    }
+    nodes = next;
+  }
+  return nodes;
 }

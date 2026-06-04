@@ -87,3 +87,37 @@ export function extractViralMenus(matches: MenuMatch[]): ViralExtract {
 export function applyViralTemplate(template: string, viral: ViralExtract): string {
   return template.replace(/\{\{viral_menus\}\}/g, viral.injection);
 }
+
+export interface TopMenusExtract {
+  count: number;
+  names: string[]; // 매칭된 상위 점수 메뉴
+  injection: string; // {{top_menus}} 자리 치환용
+}
+
+/** 매장의 매칭된 상위 메뉴 (점수 ≥ 70) 추출 → {{top_menus}} 자리 치환용 */
+export function extractTopMenus(matches: MenuMatch[]): TopMenusExtract {
+  const matched = matches
+    .filter((m) => m.matched && typeof m.score === "number" && (m.score ?? 0) >= 70)
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+    .slice(0, 3);
+  const names = matched.map((m) => m.input);
+  let injection = names.join(" · ");
+  if (!injection) injection = "매장 시그니처 메뉴";
+  if (injection.length > 40) injection = injection.slice(0, 38) + "…";
+  return {
+    count: names.length,
+    names,
+    injection,
+  };
+}
+
+/** desc_template의 {{top_menus}} + {{viral_menus}} 둘 다 치환 */
+export function applyAllTemplates(
+  template: string,
+  viral: ViralExtract,
+  top: TopMenusExtract,
+): string {
+  return template
+    .replace(/\{\{top_menus\}\}/g, top.injection)
+    .replace(/\{\{viral_menus\}\}/g, viral.injection);
+}
