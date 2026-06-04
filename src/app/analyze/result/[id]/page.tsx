@@ -114,15 +114,22 @@ export default async function ResultPage({
         peakNote: regionRow.peakNote,
       }
     : loss
-      ? {
-          regionName: loss.sigungu,
-          regionAnnualVisitors: loss.annualChineseVisitors,
-          inboundTotal: KTO_INBOUND_TOTAL_2025,
-          inboundYoy: KTO_INBOUND_YOY_2025,
-          isEstimate: true,
-          sourceLabel: "한국관광공사 외래관광객 통계 기반 자체 추정",
-          peakNote: null as string | null,
-        }
+      ? (() => {
+          // loss.note에 "평균 기반 추정"이 들어가면 fallback(시도/전국 평균),
+          // 아니면 csv 정밀 매칭 → 한국관광공사 통계 직접 사용
+          const isFallback = loss.note?.includes("평균 기반 추정") ?? false;
+          return {
+            regionName: loss.sigungu,
+            regionAnnualVisitors: loss.annualChineseVisitors,
+            inboundTotal: KTO_INBOUND_TOTAL_2025,
+            inboundYoy: KTO_INBOUND_YOY_2025,
+            isEstimate: isFallback,
+            sourceLabel: isFallback
+              ? "한국관광공사 통계 + 자체 추정"
+              : "한국관광공사 통계 기반",
+            peakNote: null as string | null,
+          };
+        })()
       : null;
   const viral = extractViralMenus(details.menu.matches);
   const topMenus = extractTopMenus(details.menu.matches);
@@ -312,7 +319,7 @@ export default async function ResultPage({
               }
               label={`${region.regionName} 권역 연간 방문 추정`}
               foot="권역 내 검색·노출 여지 존재"
-              chip={region.isEstimate ? "자체 추정" : undefined}
+              chip={region.sourceLabel || (region.isEstimate ? "자체 추정" : "한국관광공사")}
               tone="amber"
             />
           </div>
