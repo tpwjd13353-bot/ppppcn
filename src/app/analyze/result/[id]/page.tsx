@@ -242,7 +242,7 @@ export default async function ResultPage({
             )}
           </p>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <DataCard
               big={
                 region.inboundTotal
@@ -252,20 +252,6 @@ export default async function ResultPage({
               label="2025년 방한 중국 관광객"
               foot={region.inboundYoy ? `전년 대비 ${region.inboundYoy}` : ""}
               chip="한국관광공사"
-            />
-            <DataCard
-              big={
-                region.residentForeigners
-                  ? region.residentForeigners.toLocaleString() + "명"
-                  : "—"
-              }
-              label={`${region.regionName} 거주 중국인`}
-              foot="관광 흐름 + 거주 수요가 함께 모이는 권역"
-              chip={
-                region.residentRank
-                  ? `전국 거주 ${region.residentRank}위 (2025.12)`
-                  : undefined
-              }
             />
             <DataCard
               big={
@@ -279,23 +265,6 @@ export default async function ResultPage({
               tone="amber"
             />
           </div>
-
-          {Array.isArray(region.commercialZones) &&
-            region.commercialZones.length > 0 && (
-              <div className="mt-4 rc-card-sm">
-                <p className="text-[14px] font-medium">
-                  {region.regionName} 중국인 동선 — 상권 비중
-                </p>
-                <p className="mt-1 text-[12px] text-[var(--rc-txt3)]">
-                  중국인 체류·소비가 모이는 상권 비중 (자체 추정)
-                </p>
-                <div className="mt-5 space-y-3">
-                  {region.commercialZones.map((z, i) => (
-                    <BarRow key={i} {...z} />
-                  ))}
-                </div>
-              </div>
-            )}
 
           {Array.isArray(region.monthlyTrend) &&
             region.monthlyTrend.length > 0 && (
@@ -775,34 +744,6 @@ function DataCard({
           {chip}
         </span>
       )}
-    </div>
-  );
-}
-
-function BarRow({
-  name,
-  weight,
-  label,
-  type,
-}: {
-  name: string;
-  weight: number;
-  label?: string;
-  type: "hot" | "you" | "cool";
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-[130px] shrink-0 text-[13px] text-[var(--rc-txt2)]">
-        {name}
-      </div>
-      <div className="relative h-[26px] flex-1 overflow-hidden rounded-[7px] bg-[var(--rc-surface2)]">
-        <div
-          className={`flex h-full items-center justify-end rounded-[7px] pr-2.5 text-[12px] font-bold text-white rc-bar-${type}`}
-          style={{ width: `${Math.min(100, Math.max(0, weight))}%` }}
-        >
-          {label}
-        </div>
-      </div>
     </div>
   );
 }
