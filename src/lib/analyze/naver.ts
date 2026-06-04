@@ -45,11 +45,34 @@ const PLACE_ID_PATTERNS: RegExp[] = [
 
 async function resolveShortUrl(url: string): Promise<string> {
   if (!/naver\.me/.test(url)) return url;
+
+  // 1순위: native fetch로 자동 리다이렉트 추적 → res.url
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(url, {
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1",
+      },
+    });
+    clearTimeout(t);
+    if (res.url && res.url !== url && /naver\.com/.test(res.url)) {
+      return res.url;
+    }
+    // 본문에서도 한 번 더 시도 (메타 리프레시 등)
+    const text = await res.text();
+    const m = text.match(/https?:\/\/[^"'\s<>]*place[^"'\s<>]*\d+[^"'\s<>]*/);
+    if (m) return m[0];
+  } catch {
+    /* fall through */
+  }
+
+  // 2순위 fallback: axios 기반 fetchHtml (프록시 환경에서 보조)
   try {
     const res = await fetchHtml(url, { timeout: 5000 });
-    // axios는 자동 리다이렉트 후 최종 URL을 res.request.res.responseUrl에 두지만,
-    // 단순화를 위해 Location 헤더만 확인하기는 어렵다 — 본문/리다이렉트가 이미 따라간 상태.
-    // naver.me 단축링크는 보통 HTML 메타 리다이렉트도 사용하므로 본문에서 URL 추출 시도.
     const m = res.data.match(/https?:\/\/[^"'\s]*place[^"'\s]*\d+[^"'\s]*/);
     if (m) return m[0];
   } catch {

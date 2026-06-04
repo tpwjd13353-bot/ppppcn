@@ -70,7 +70,7 @@ export function AnalyzeForm({ tier }: Props) {
           id="naver-url"
           type="text"
           inputMode="url"
-          placeholder="https://m.place.naver.com/restaurant/1234567890/home"
+          placeholder="https://naver.me/Fio7BDHa  또는  네이버 플레이스 주소"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={submitting}
@@ -95,9 +95,30 @@ export function AnalyzeForm({ tier }: Props) {
           )}
         </button>
 
-        <p className="mt-2 text-xs text-muted-foreground">
-          예: 네이버 지도에서 가게 검색 → 우측 상단 공유 → URL 복사
-        </p>
+        <div className="mt-3 rounded-md border border-border/30 bg-background/40 p-3 text-xs text-muted-foreground">
+          <p className="font-medium text-foreground/80">붙여넣기 가능한 형태:</p>
+          <ul className="mt-1.5 space-y-1">
+            <li>
+              · 단축링크{" "}
+              <span className="font-mono text-foreground/70">https://naver.me/...</span>
+            </li>
+            <li>
+              · 모바일{" "}
+              <span className="font-mono text-foreground/70">
+                https://m.place.naver.com/restaurant/...
+              </span>
+            </li>
+            <li>
+              · PC 지도{" "}
+              <span className="font-mono text-foreground/70">
+                https://map.naver.com/p/entry/place/...
+              </span>
+            </li>
+          </ul>
+          <p className="mt-2 text-muted-foreground/70">
+            네이버 지도 / 플레이스에서 가게 검색 → <b className="text-foreground/70">공유</b> 버튼 → URL 복사 → 여기에 붙여넣기
+          </p>
+        </div>
       </form>
 
       {error && (
