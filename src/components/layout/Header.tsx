@@ -9,11 +9,10 @@ import { signOutAction } from "@/lib/auth-actions";
 
 const NAV_ITEMS = [
   { href: "/analyze", label: "분석", highlight: true },
-  { href: "/work", label: "Work" },
-  { href: "/services", label: "Services" },
-  { href: "/insights", label: "Insights" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/services", label: "서비스" },
+  { href: "/insights", label: "인사이트" },
+  { href: "/about", label: "회사소개" },
+  { href: "/contact", label: "문의" },
 ];
 
 type HeaderUser = {
@@ -49,7 +48,7 @@ export function Header({ user }: { user: HeaderUser }) {
         </Link>
 
         {/* 데스크탑 내비게이션 */}
-        <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
+        <nav className="hidden items-center gap-7 text-[15px] font-medium md:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}

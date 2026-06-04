@@ -50,12 +50,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
               <li>
                 <Link href="/about" className="hover:text-primary">
-                  소개
-                </Link>
-              </li>
-              <li>
-                <Link href="/work" className="hover:text-primary">
-                  레퍼런스
+                  회사소개
                 </Link>
               </li>
             </ul>
