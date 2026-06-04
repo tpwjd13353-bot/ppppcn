@@ -21,12 +21,18 @@ export async function seedAdmin(): Promise<void> {
   const { db, schema } = await import("./db");
 
   // 전체 데이터 리셋 (옵션)
+  // 외래키 참조하는 자식 테이블의 userId를 먼저 NULL로 풀고 user를 삭제해야
+  // SQLITE_CONSTRAINT_FOREIGNKEY 위반이 발생하지 않음. analyses·usage_log row 자체는 유지.
   if (process.env.ADMIN_RESET_ALL === "true") {
+    await db.update(schema.analyses).set({ userId: null });
+    await db.update(schema.usageLog).set({ userId: null });
     await db.delete(schema.sessions);
     await db.delete(schema.accounts);
     await db.delete(schema.phoneCodes);
     await db.delete(schema.users);
-    console.log("[seed-admin] reset: cleared sessions/accounts/phoneCodes/users");
+    console.log(
+      "[seed-admin] reset: cleared sessions/accounts/phoneCodes/users (analyses·usage_log userId set to null)",
+    );
   }
 
   const passwordHash = await bcrypt.hash(seedPassword, 10);
