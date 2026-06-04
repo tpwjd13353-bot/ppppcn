@@ -562,7 +562,7 @@ export default async function ResultPage({
 
       <div className="relative mt-5 overflow-hidden rounded-[18px] border border-[var(--rc-lineS)]">
         <div
-          className="p-8 pointer-events-none select-none blur-[2px]"
+          className="p-8 pointer-events-none select-none blur-[5px] opacity-80"
           aria-hidden
         >
           <h4 className="text-[16px] font-bold">연간 잠재 매출 손실 추정</h4>
@@ -596,7 +596,7 @@ export default async function ResultPage({
           )}
         </div>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(20,20,22,0.05),rgba(10,10,11,0.55))] p-8 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(20,20,22,0.35),rgba(10,10,11,0.75))] p-8 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--rc-red)] bg-[rgba(255,45,45,0.12)]">
             <ShieldAlert className="h-5 w-5 text-[var(--rc-red)]" />
           </div>
