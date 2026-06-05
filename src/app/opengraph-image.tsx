@@ -30,7 +30,7 @@ export default async function OgImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: 72,
+          padding: "72px 120px",
           backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.35) 18%, rgba(0,0,0,0.0) 45%, rgba(0,0,0,0.2) 70%, rgba(0,0,0,0.8) 100%), url(${bgDataUri})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
