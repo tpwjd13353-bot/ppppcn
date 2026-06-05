@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText, Users as UsersIcon } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText, Users as UsersIcon, Sparkles } from "lucide-react";
 import {
   GRADIENT_PRESETS,
   PLATFORM_OPTIONS,
@@ -223,6 +223,13 @@ export default function AdminPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="/admin/proposal"
+              className="inline-flex items-center gap-2 rounded-md border border-primary/50 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
+            >
+              <Sparkles className="h-4 w-4" />
+              제안서 생성
+            </a>
             <a
               href="/admin/columns"
               className="inline-flex items-center gap-2 rounded-md border border-primary/50 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
