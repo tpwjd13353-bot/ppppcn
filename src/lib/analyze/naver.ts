@@ -36,11 +36,19 @@ export class NaverParseError extends Error {
 // ============================================
 
 const PLACE_ID_PATTERNS: RegExp[] = [
+  // path 기반
   /\/place\/(\d+)/,
   /\/restaurant\/(\d+)/,
   /entry\/place\/(\d+)/,
-  /[?&]id=(\d+)/,
   /place\.naver\.com\/(?:restaurant|place|hairshop|beautyshop|hospital|accommodation|cafe)\/(\d+)/,
+  // m.map.naver.com appLink (단축링크 → m.map.naver.com 으로 풀린 케이스)
+  /m\.map\.naver\.com\/appLink[^"'\s<>]*[?&](?:pinId|entryId|placeId|id)=(\d+)/,
+  /m\.map\.naver\.com[^"'\s<>]*[?&](?:pinId|entryId|placeId)=(\d+)/,
+  // query 기반 (마지막 — 다른 패턴이 우선)
+  /[?&]pinId=(\d+)/,
+  /[?&]entryId=(\d+)/,
+  /[?&]placeId=(\d+)/,
+  /[?&]id=(\d+)/,
 ];
 
 async function resolveShortUrl(url: string): Promise<string> {
