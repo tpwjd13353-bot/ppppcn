@@ -23,7 +23,6 @@ import { RefineForm } from "./RefineForm";
 import { ScoreGauge } from "./ScoreGauge";
 import { MenuTable } from "./MenuTable";
 import { auth } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
 import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
 import {
@@ -92,7 +91,6 @@ export default async function ResultPage({
   const row = rows[0];
   if (!row) notFound();
   const isMember = !!session?.user;
-  const isAdmin = isAdminEmail(session?.user?.email);
 
   const data = row.reportData as ReportData;
   const { place, result } = data;
@@ -153,25 +151,13 @@ export default async function ResultPage({
         }}
       />
       <div className="relative z-10">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href="/analyze"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          다시 분석하기
-        </Link>
-        {isAdmin && (
-          <a
-            href={`/api/analyze/${id}/pdf`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rc-red)] bg-[var(--rc-red)]/10 px-3 py-1.5 text-[12px] font-semibold tracking-tight text-[var(--rc-red)] transition hover:bg-[var(--rc-red)] hover:text-white"
-            title="어드민 전용 — 횟수 제한 없이 PDF 다운로드"
-          >
-            <Download className="h-3.5 w-3.5" />
-            ADMIN · PDF 다운로드
-          </a>
-        )}
-      </div>
+      <Link
+        href="/analyze"
+        className="inline-flex items-center gap-1.5 text-sm text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        다시 분석하기
+      </Link>
 
       {/* 1. 가게 헤더 */}
       <header className="rc-card mt-6">
