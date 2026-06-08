@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { PdfDynamicReport } from "@/lib/pdf/dynamic/PdfDynamicReport";
 import { registerPdfFonts } from "@/lib/pdf/registerFonts";
+import { sanitizeProposal } from "@/lib/proposal/sanitize";
 import type { ProposalData } from "@/lib/proposal/types";
 
 export const dynamic = "force-dynamic";
@@ -41,8 +42,9 @@ export async function POST(req: Request) {
 
   registerPdfFonts();
 
+  const safeData = sanitizeProposal(body.data);
   const doc = PdfDynamicReport({
-    data: body.data,
+    data: safeData,
     contactName: body.contactName,
     contactTitle: body.contactTitle,
     contactPhone: body.contactPhone,
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const safe = (body.fileName || `${body.data.meta.clientName || "proposal"}-china-marketing-proposal`)
+  const safe = (body.fileName || `${safeData.meta.clientName || "proposal"}-china-marketing-proposal`)
     .replace(/[^\w가-힣.\-]/g, "_")
     .slice(0, 120);
   const filename = `${safe}.pdf`;
