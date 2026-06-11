@@ -45,6 +45,12 @@ export const dynamic = "force-dynamic";
 interface ReportData {
   place: NaverPlaceData;
   result: AnalysisResult;
+  manual?: {
+    isManual: boolean;
+    category?: string;
+    categoryLabel?: string;
+    aiScoreReason?: string | null;
+  };
 }
 
 export async function generateMetadata({
@@ -94,6 +100,9 @@ export default async function ResultPage({
 
   const data = row.reportData as ReportData;
   const { place, result } = data;
+  const isManual = data.manual?.isManual === true;
+  const manualReason = data.manual?.aiScoreReason ?? null;
+  const manualCategoryLabel = data.manual?.categoryLabel ?? null;
   const { store, marketing, details, conclusion, consultation } = result;
   const gap = store.score - marketing.score;
 
@@ -181,15 +190,22 @@ export default async function ResultPage({
               <Award className="h-3.5 w-3.5" />
               MEITUAN OFFICIAL PARTNER
             </span>
-            <a
-              href={place.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rc-line)] px-3 py-1.5 text-[13px] text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              네이버에서 보기
-            </a>
+            {isManual ? (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rc-red)]/40 bg-[var(--rc-red)]/10 px-3 py-1.5 text-[12px] font-semibold tracking-tight text-[var(--rc-red)]">
+                <Sparkles className="h-3.5 w-3.5" />
+                오픈예정 · AI 분석
+              </span>
+            ) : (
+              <a
+                href={place.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rc-line)] px-3 py-1.5 text-[13px] text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                네이버에서 보기
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -204,6 +220,27 @@ export default async function ResultPage({
           {conclusion}
         </p>
       </section>
+
+      {/* 2-1. 오픈예정 (manual) 케이스 — AI 종합 점수 근거 */}
+      {isManual && manualReason && (
+        <section className="mt-5 rounded-[18px] border border-[var(--rc-line)] bg-[var(--rc-card)]/40 p-6">
+          <p className="flex items-center gap-2 text-[12px] font-semibold tracking-tight text-[var(--rc-red)]">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI 종합 적합성 진단
+            {manualCategoryLabel && (
+              <span className="ml-1 text-[var(--rc-txt2)] font-normal">
+                · {manualCategoryLabel}
+              </span>
+            )}
+          </p>
+          <p className="mt-3 text-[15px] leading-[1.7] text-[var(--rc-txt)]">
+            {manualReason}
+          </p>
+          <p className="mt-3 text-[12px] text-[var(--rc-txt2)]">
+            오픈예정 매장은 메뉴 DB 매칭 없이 카테고리·주소 기반으로 AI가 종합 점수를 산출합니다. 오픈 후 네이버 플레이스 URL로 재분석하시면 메뉴 단위 정밀 점수를 받으실 수 있습니다.
+          </p>
+        </section>
+      )}
 
       {/* 3. 점수 2개 */}
       <section className="mt-5 grid gap-5 md:grid-cols-2">
@@ -234,8 +271,8 @@ export default async function ResultPage({
                 }
               />
               <Metric
-                icon="🍽"
-                label="메뉴"
+                icon={isManual ? "🤖" : "🍽"}
+                label={isManual ? "AI 적합성" : "메뉴"}
                 value={details.menu.score ?? null}
                 tone={
                   details.menu.score === null
@@ -246,7 +283,11 @@ export default async function ResultPage({
                         ? "amber"
                         : "red"
                 }
-                foot={`${details.menu.matchedCount}/${details.menu.matches.length} 매칭`}
+                foot={
+                  isManual
+                    ? "카테고리·주소 기반"
+                    : `${details.menu.matchedCount}/${details.menu.matches.length} 매칭`
+                }
               />
             </div>
           </div>

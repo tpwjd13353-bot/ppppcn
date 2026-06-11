@@ -20,9 +20,29 @@ import { generateAiPlaybook } from "@/lib/analyze/aiPlaybook";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
 import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
 import { extractViralMenus } from "@/lib/analyze/viralMenus";
+import {
+  generateManualMenuScore,
+  MANUAL_CATEGORY_LABEL,
+  type ManualCategory,
+} from "@/lib/analyze/manualScoring";
+import type { NaverPlaceData } from "@/lib/analyze/naver";
+
+interface ManualBody {
+  mode: "manual";
+  placeName?: string;
+  address: string;
+  category: ManualCategory;
+}
+
+interface UrlBody {
+  mode?: "url";
+  url: string;
+}
+
+type AnalyzeBody = ManualBody | UrlBody;
 
 export async function POST(req: Request) {
-  let body: { url?: string };
+  let body: Partial<AnalyzeBody>;
   try {
     body = await req.json();
   } catch {
@@ -32,12 +52,30 @@ export async function POST(req: Request) {
     );
   }
 
-  const url = (body.url ?? "").trim();
-  if (!url) {
-    return Response.json(
-      { ok: false, error: "네이버 플레이스 URL을 입력해주세요." },
-      { status: 400 },
-    );
+  const mode = body.mode === "manual" ? "manual" : "url";
+
+  if (mode === "url") {
+    const url = ((body as UrlBody).url ?? "").trim();
+    if (!url) {
+      return Response.json(
+        { ok: false, error: "네이버 플레이스 URL을 입력해주세요." },
+        { status: 400 },
+      );
+    }
+  } else {
+    const m = body as ManualBody;
+    if (!m.address?.trim() || !m.category) {
+      return Response.json(
+        { ok: false, error: "주소와 카테고리는 필수입니다." },
+        { status: 400 },
+      );
+    }
+    if (!MANUAL_CATEGORY_LABEL[m.category]) {
+      return Response.json(
+        { ok: false, error: "지원하지 않는 카테고리입니다." },
+        { status: 400 },
+      );
+    }
   }
 
   // 횟수 제한
@@ -61,38 +99,94 @@ export async function POST(req: Request) {
     );
   }
 
-  // 크롤링
-  let place;
-  try {
-    place = await fetchPlaceData(url);
-  } catch (e) {
-    if (e instanceof NaverParseError) {
+  // 플레이스 데이터 — URL이면 크롤링, manual이면 합성
+  let place: NaverPlaceData;
+  let manualScoreNote: string | null = null;
+
+  if (mode === "url") {
+    const url = (body as UrlBody).url.trim();
+    try {
+      place = await fetchPlaceData(url);
+    } catch (e) {
+      if (e instanceof NaverParseError) {
+        return Response.json(
+          { ok: false, error: e.message, hint: e.hint },
+          { status: 422 },
+        );
+      }
       return Response.json(
-        { ok: false, error: e.message, hint: e.hint },
-        { status: 422 },
+        {
+          ok: false,
+          error: "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
+          hint: e instanceof Error ? e.message : undefined,
+        },
+        { status: 500 },
       );
     }
-    return Response.json(
-      {
-        ok: false,
-        error: "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
-        hint: e instanceof Error ? e.message : undefined,
-      },
-      { status: 500 },
-    );
+  } else {
+    const m = body as ManualBody;
+    const ai = await generateManualMenuScore({
+      placeName: m.placeName?.trim() || undefined,
+      address: m.address.trim(),
+      category: m.category,
+    });
+    manualScoreNote = ai.reason;
+    place = {
+      placeId: `manual-${Date.now()}`,
+      name: m.placeName?.trim() || "오픈예정 매장",
+      address: m.address.trim(),
+      roadAddress: m.address.trim(),
+      category: MANUAL_CATEGORY_LABEL[m.category],
+      menus: [],
+      sourceUrl: "",
+      partial: true,
+      notes: [
+        "오픈예정 — 네이버 플레이스 URL 없이 주소·카테고리로 분석.",
+        `AI 종합 적합성 점수: ${ai.score} (${ai.model})`,
+        ai.reason,
+      ],
+    };
+    // 합성 데이터에 AI 점수를 일단 저장 (아래 result 갱신에서 사용)
+    (place as NaverPlaceData & { _aiScore?: number })._aiScore = ai.score;
   }
 
-  // 점수 계산
+  // 기본 점수 계산
   const result = analyzeStore(place.address, place.roadAddress, place.menus);
+
+  // manual 모드면 메뉴 점수 자리에 AI 점수 주입
+  if (mode === "manual") {
+    const aiScore = (place as NaverPlaceData & { _aiScore?: number })._aiScore ?? 60;
+    result.details.menu = {
+      ...result.details.menu,
+      score: aiScore,
+      needsConsultation: false,
+      consultationReason: manualScoreNote ?? undefined,
+    };
+    const regionScore = result.details.region.score;
+    const combined = Math.round((regionScore + aiScore) / 2);
+    result.store = { ...result.store, score: combined };
+  }
 
   // DB 저장
   const session = await auth();
   const userId = session?.user?.id ?? null;
   const id = `anl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const naverUrlField =
+    mode === "url" ? (body as UrlBody).url.trim() : `manual:${(body as ManualBody).category}`;
+  const manualMeta =
+    mode === "manual"
+      ? {
+          isManual: true as const,
+          category: (body as ManualBody).category,
+          categoryLabel: MANUAL_CATEGORY_LABEL[(body as ManualBody).category],
+          aiScoreReason: manualScoreNote,
+        }
+      : { isManual: false as const };
+
   await db.insert(schema.analyses).values({
     id,
     userId,
-    naverUrl: url,
+    naverUrl: naverUrlField,
     placeName: place.name,
     menu: place.menus,
     scores: {
@@ -102,7 +196,7 @@ export async function POST(req: Request) {
       menu: result.details.menu.score ?? -1,
     },
     totalScore: result.store.score,
-    reportData: { place, result },
+    reportData: { place, result, manual: manualMeta },
   });
 
   await recordUsage(req, "analyze");
