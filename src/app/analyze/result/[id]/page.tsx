@@ -50,6 +50,7 @@ interface ReportData {
     category?: string;
     categoryLabel?: string;
     aiScoreReason?: string | null;
+    services?: string[];
   };
 }
 
@@ -103,6 +104,10 @@ export default async function ResultPage({
   const isManual = data.manual?.isManual === true;
   const manualReason = data.manual?.aiScoreReason ?? null;
   const manualCategoryLabel = data.manual?.categoryLabel ?? null;
+  const manualServices = (data.manual?.services ?? []).filter(
+    (s) => typeof s === "string" && s.trim().length > 0,
+  );
+  const hasManualServices = isManual && manualServices.length > 0;
   const { store, marketing, details, conclusion, consultation } = result;
   const gap = store.score - marketing.score;
 
@@ -193,7 +198,7 @@ export default async function ResultPage({
             {isManual ? (
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--rc-red)]/40 bg-[var(--rc-red)]/10 px-3 py-1.5 text-[12px] font-semibold tracking-tight text-[var(--rc-red)]">
                 <Sparkles className="h-3.5 w-3.5" />
-                오픈예정 · AI 분석
+                수기 입력 · AI 분석
               </span>
             ) : (
               <a
@@ -221,7 +226,7 @@ export default async function ResultPage({
         </p>
       </section>
 
-      {/* 2-1. 오픈예정 (manual) 케이스 — AI 종합 점수 근거 */}
+      {/* 2-1. 수기 입력 (manual) 케이스 — AI 종합 점수 근거 + 서비스/상품 목록 */}
       {isManual && manualReason && (
         <section className="mt-5 rounded-[18px] border border-[var(--rc-line)] bg-[var(--rc-card)]/40 p-6">
           <p className="flex items-center gap-2 text-[12px] font-semibold tracking-tight text-[var(--rc-red)]">
@@ -236,8 +241,28 @@ export default async function ResultPage({
           <p className="mt-3 text-[15px] leading-[1.7] text-[var(--rc-txt)]">
             {manualReason}
           </p>
+          {hasManualServices && (
+            <div className="mt-5 rounded-[12px] border border-[var(--rc-lineS)] bg-[var(--rc-surface2)] p-4">
+              <p className="text-[12px] font-semibold tracking-tight text-[var(--rc-txt2)]">
+                입력하신 서비스 · 상품 ({manualServices.length}건)
+              </p>
+              <ul className="mt-3 grid gap-2 md:grid-cols-2">
+                {manualServices.map((s, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-[14px] leading-[1.55] text-[var(--rc-txt)]"
+                  >
+                    <span className="mt-0.5 text-[var(--rc-red)]">·</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p className="mt-3 text-[12px] text-[var(--rc-txt2)]">
-            오픈예정 매장은 메뉴 DB 매칭 없이 카테고리·주소 기반으로 AI가 종합 점수를 산출합니다. 오픈 후 네이버 플레이스 URL로 재분석하시면 메뉴 단위 정밀 점수를 받으실 수 있습니다.
+            {hasManualServices
+              ? "수기 입력하신 서비스·상품과 주소·카테고리를 종합해 AI가 적합성 점수와 플랫폼별 노출 예상을 산출했습니다."
+              : "서비스·상품을 함께 입력하시면 AI가 더 정확하게 점수를 매기고 플랫폼별 노출 예상까지 만들어 드립니다."}
           </p>
         </section>
       )}
@@ -285,7 +310,9 @@ export default async function ResultPage({
                 }
                 foot={
                   isManual
-                    ? "카테고리·주소 기반"
+                    ? hasManualServices
+                      ? `서비스/상품 ${manualServices.length}건 기반`
+                      : "카테고리·주소 기반"
                     : `${details.menu.matchedCount}/${details.menu.matches.length} 매칭`
                 }
               />
@@ -453,21 +480,22 @@ export default async function ResultPage({
         </>
       )}
 
-      {/* 7. 무기 블록 — 매장 최고점 메뉴 + 매장별 채널 효과 */}
-      {(topMenus.count > 0 || viral.count > 0) && (() => {
+      {/* 7. 무기 블록 — 매장 최고점 메뉴/서비스 + 매장별 채널 효과 */}
+      {(topMenus.count > 0 || viral.count > 0 || hasManualServices) && (() => {
         // 최고점 매칭 메뉴 (DB명, 점수, 분류)
         const topMatched = details.menu.matches
           .filter((m) => m.matched && typeof m.score === "number")
           .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0];
+        const manualTop = hasManualServices ? manualServices[0] : undefined;
         const hotMenu = row.aiPlaybook?.weaponHotMenu?.menuName ||
-          topMatched?.menuName || topMatched?.input || "시그니처 메뉴";
+          topMatched?.menuName || topMatched?.input || manualTop || "시그니처 상품";
         const hotScore = row.aiPlaybook?.weaponHotMenu?.score ?? topMatched?.score ?? null;
-        const hotLabel = row.aiPlaybook?.weaponHotMenu?.label || "중국인 관광객 상대로 터지는 메뉴";
-        const hotTagline = row.aiPlaybook?.weaponHotMenu?.tagline || "= 샤오홍슈에서 사진 터지는 메뉴";
+        const hotLabel = row.aiPlaybook?.weaponHotMenu?.label || (hasManualServices ? "중국인 관광객 상대로 터질 서비스/상품" : "중국인 관광객 상대로 터지는 메뉴");
+        const hotTagline = row.aiPlaybook?.weaponHotMenu?.tagline || (hasManualServices ? "= 샤오홍슈에서 검색·노출이 강한 카테고리" : "= 샤오홍슈에서 사진 터지는 메뉴");
 
         const mzLabel = row.aiPlaybook?.weaponMz?.label || "중국 MZ가 원하는 건";
         const mzLineA = row.aiPlaybook?.weaponMz?.lineA || `${hotMenu}의`;
-        const mzLineB = row.aiPlaybook?.weaponMz?.lineB || "굽는 순간·자르는 순간이 핵심입니다";
+        const mzLineB = row.aiPlaybook?.weaponMz?.lineB || (hasManualServices ? "체험·비주얼 순간이 핵심 콘텐츠로 작동합니다" : "굽는 순간·자르는 순간이 핵심입니다");
         const mzTagline = row.aiPlaybook?.weaponMz?.tagline || "비주얼 = 무료 바이럴 광고";
 
         return (
@@ -524,7 +552,7 @@ export default async function ResultPage({
             각 플랫폼에서 우리 가게는 어떻게 보일까
           </h2>
           <p className="mt-2 text-[14px] text-[var(--rc-txt2)]">
-            샤오홍슈·따종디엔핑·도우인 — 같은 메뉴라도 채널별로 노출되는 방식이 달라요.
+            샤오홍슈·따종디엔핑·도우인 — 같은 {hasManualServices ? "서비스/상품" : "메뉴"}이라도 채널별로 노출되는 방식이 달라요.
           </p>
 
           <div className="rc-play mt-5">
@@ -535,7 +563,9 @@ export default async function ResultPage({
               </span>
             </div>
             <p className="mt-2 text-[13px] leading-[1.6] text-[var(--rc-txt2)]">
-              이 매장 메뉴를 기준으로 각 채널에서의 노출·검색 방식을 정리한 분석입니다.
+              {hasManualServices
+                ? "수기 입력하신 서비스·상품을 기준으로 각 채널에서의 노출·검색 방식을 AI가 분석했습니다."
+                : "이 매장 메뉴를 기준으로 각 채널에서의 노출·검색 방식을 정리한 분석입니다."}
             </p>
 
             {platforms.map((p) => {

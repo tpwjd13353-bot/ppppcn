@@ -112,6 +112,7 @@ function buildUserPrompt(
   region: { regionName: string; regionAnnualVisitors: number | null } | null,
   viral: ViralExtract,
   platforms: PlatformSeed[],
+  manualServices: string[] = [],
 ): string {
   // 매칭된 메뉴를 DB 매칭명 기준으로 집계 (사용자 원본 메뉴명은 너무 구체적이라 일반화 어려움).
   // 분류 정보(절대선호/매우선호 등)와 함께 모델에게 전달.
@@ -156,6 +157,20 @@ function buildUserPrompt(
     )
     .join("\n");
 
+  const manualBlock =
+    manualServices.length > 0
+      ? `
+[수기 입력 서비스/상품 — 이 매장의 실제 판매 품목, 카피·점수의 핵심 입력]
+${manualServices.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+[중요 — 수기 입력 모드 지시사항]
+- 위 "서비스/상품"이 이 매장의 실제 판매 아이템입니다. 메뉴 DB 매칭 결과보다 이 입력을 우선 사용하세요.
+- weaponHotMenu.menuName / weaponMz.lineA 등 메뉴 인용은 반드시 위 서비스/상품 중 가장 중국 관광객 수요가 강한 1건을 골라 사용하세요.
+- 각 플랫폼 카드 desc는 위 서비스/상품 목록을 구체적으로 언급하며, 채널 노출 방식을 분석·추정형 어미로 설명하세요.
+- 「삼겹살」 같은 예시 메뉴는 사용 금지. 반드시 위 입력에서 가져오세요.
+`
+      : "";
+
   return `
 [매장 데이터]
 - 이름: ${place.name}
@@ -179,11 +194,12 @@ ${originalSample || "(없음)"}
 [메뉴 — 미매칭(시각 바이럴 자산 후보)]
 ${unmatchedNames || "(없음)"}
 음료·디저트 자동 추출: ${viral.count}종 → 예시 "${viral.injection}"
-
+${manualBlock}
 [카피 작성 시 유의]
 - 메뉴 이름은 일반화된 카테고리명(예: "삼겹살", "치킨", "짬뽕")을 사용하세요.
 - 사용자 입력 원본명(예: "생고기 한접시(삼겹살&목살)700g")은 그대로 노출하지 마세요.
 - 매장 카테고리·분위기를 파악해 자연스러운 마케팅 멘트로 작성하세요.
+- 수기 입력 서비스/상품이 있으면 그것을 1순위 인용 소스로 사용하세요.
 
 [플랫폼 카드 3종 — 각각 desc + lockedTeaser 작성]
 ${platformList}
@@ -198,6 +214,7 @@ export async function generateAiPlaybook(params: {
   result: AnalysisResult;
   region: { regionName: string; regionAnnualVisitors: number | null } | null;
   viral: ViralExtract;
+  manualServices?: string[];
 }): Promise<void> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -232,6 +249,7 @@ export async function generateAiPlaybook(params: {
             params.region,
             params.viral,
             platforms,
+            params.manualServices ?? [],
           ),
         },
       ],

@@ -34,30 +34,36 @@ export interface ManualScoreResult {
 }
 
 const SYSTEM = `당신은 한국 매장의 "방한 중국 관광객 매출 적합성"을 평가하는 중국 마케팅 시니어 분석가입니다.
-입력은 (1) 카테고리, (2) 주소, (3) 선택: 상호명 뿐입니다.
+입력은 (1) 카테고리, (2) 주소, (3) 서비스/상품 목록(선택), (4) 상호명(선택)입니다.
 
 평가 기준 (가중치 합 100):
-- 카테고리 자체의 중국 관광객 수요 강도 (40)
-   · 화장품/뷰티/성형: 본토 직판 가능성 + 면세·관광 수요 모두 강함
-   · 음식점: 위치·메뉴 의존도 높음 (정보 부족 시 중간값)
-   · 카페/디저트: 비주얼·SNS 친화도에 좌우. 평균 중상
-   · 패션/잡화: K-패션 관광 수요 일부, 본토 직판은 약함
-   · 의료·미용: 의료관광 수요 강함
-   · 기타: 보수적으로 평균
+- 입력된 서비스/상품의 중국 관광객 수요 적합성 (45)
+   · 서비스/상품이 입력된 경우 → 이 항목이 평가의 핵심. 각 아이템이 중국 관광객/유학생/거주민 수요와 얼마나 맞는지 판단
+   · 웰니스/스파/마사지/한방 → 중국 MZ의 "양생(养生)" 트렌드와 강하게 결합. 비주얼·체험형 상품일수록 높음
+   · K-뷰티/한방 화장품/시술 → 본토 직판·면세 수요 강함
+   · 비주얼 친화 음식/디저트/음료 → SNS 노출 강함
+   · 단가가 너무 낮거나 일상 잡화 위주면 보수적으로
+   · 서비스/상품이 비어있으면 카테고리만으로 보수적 추정 (60~70 사이)
 - 주소 권역의 중국 관광객 집중도 (35)
    · 명동·홍대·강남·성수·해운대·제주 → 높음
    · 그 외 서울 → 중상, 광역시 핵심 상권 → 중, 그 외 → 낮음
-- 오픈예정 단계의 검증 불확실성 (25)
-   · 정보가 적으므로 과도한 점수(>90) 또는 과도한 저점(<30) 회피
-   · 60~80 사이 분포가 일반적
+- 카테고리 자체의 수요 강도 (20)
+   · 화장품/뷰티/의료/웰니스: 강함
+   · 음식점/카페: 위치·메뉴 의존도 높음
+   · 패션/잡화/기타: 중간
 
-출력은 반드시 JSON: {"score": 정수 0~100, "reason": "1~2줄 한국어 존댓말 설명"}.
-점수는 정수, 추측 금지, "확인 필요" 표현은 사용하지 않음 (점수는 반드시 산출).`;
+점수 출력 가이드:
+- 정보가 풍부(서비스/상품 입력O)할수록 30~95 사이 분포 가능
+- 정보가 적으면(서비스/상품 입력X) 55~80 사이 보수적 분포
+- "확인 필요" 표현은 사용하지 않음 (점수는 반드시 산출)
+
+출력은 반드시 JSON: {"score": 정수 0~100, "reason": "2~4줄 한국어 존댓말 설명. 입력된 서비스/상품을 어떻게 평가했는지 구체적으로 언급"}.`;
 
 export async function generateManualMenuScore(params: {
   placeName?: string;
   address: string;
   category: ManualCategory;
+  services?: string;
 }): Promise<ManualScoreResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -70,10 +76,14 @@ export async function generateManualMenuScore(params: {
   }
 
   const client = new OpenAI({ apiKey });
+  const trimmedServices = params.services?.trim();
   const userMsg = [
     `- 카테고리: ${MANUAL_CATEGORY_LABEL[params.category]}`,
     `- 주소: ${params.address}`,
     params.placeName ? `- 상호: ${params.placeName}` : "- 상호: (오픈예정 — 미정)",
+    trimmedServices
+      ? `- 서비스/상품:\n${trimmedServices.split(/\r?\n/).map((s) => `   · ${s.trim()}`).filter((s) => s.length > 3).join("\n")}`
+      : "- 서비스/상품: (입력 없음)",
   ].join("\n");
 
   const model = "gpt-4o-mini";

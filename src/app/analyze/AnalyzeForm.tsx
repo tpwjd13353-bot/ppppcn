@@ -39,6 +39,7 @@ export function AnalyzeForm({ tier }: Props) {
   const [placeName, setPlaceName] = useState("");
   const [address, setAddress] = useState("");
   const [category, setCategory] = useState<Category | "">("");
+  const [services, setServices] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<{ message: string; hint?: string } | null>(
@@ -76,6 +77,7 @@ export function AnalyzeForm({ tier }: Props) {
               placeName: placeName.trim() || undefined,
               address: address.trim(),
               category,
+              services: services.trim() || undefined,
             };
 
       const res = await fetch("/api/analyze", {
@@ -139,7 +141,7 @@ export function AnalyzeForm({ tier }: Props) {
           }`}
         >
           <Building2 className="h-4 w-4" />
-          오픈예정 · 주소만
+          수기 정보 입력
         </button>
       </div>
 
@@ -212,7 +214,24 @@ export function AnalyzeForm({ tier }: Props) {
                 ))}
               </select>
               <p className="mt-1 text-xs text-muted-foreground/70">
-                AI가 카테고리·주소 기반으로 중국 관광객 시장 적합성을 종합 점수로 산출합니다.
+                AI가 카테고리·주소·서비스/상품 기반으로 중국 관광객 시장 적합성을 종합 점수로 산출합니다.
+              </p>
+            </div>
+            <div>
+              <label htmlFor="services" className="text-sm font-medium">
+                서비스 · 상품 <span className="text-muted-foreground/70">(선택 — 적을수록 점수 정확도가 올라가요)</span>
+              </label>
+              <textarea
+                id="services"
+                placeholder={"예시\n· 웰니스 마사지 (60분/90분)\n· 한방 족욕 패키지\n· 비건 스킨케어 굿즈 판매\n· 명상·요가 클래스"}
+                value={services}
+                onChange={(e) => setServices(e.target.value)}
+                disabled={submitting}
+                rows={6}
+                className="mt-1.5 w-full rounded-md border border-border/50 bg-background px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none disabled:opacity-60"
+              />
+              <p className="mt-1 text-xs text-muted-foreground/70">
+                매장에서 파는 서비스·상품·메뉴를 한 줄에 하나씩 적어주세요. AI가 이걸 보고 점수와 플랫폼별 노출 예상을 만들어 드려요.
               </p>
             </div>
           </>
@@ -268,10 +287,10 @@ export function AnalyzeForm({ tier }: Props) {
             <ul className="mt-1.5 space-y-1">
               <li>· 아직 오픈하지 않아 네이버 플레이스가 없는 매장</li>
               <li>· 신규 브랜드 / 팝업 / 입점 검토 단계</li>
-              <li>· 메뉴 DB 매칭이 어려운 비식음료 업종 (화장품·패션·미용 등)</li>
+              <li>· 메뉴 DB 매칭이 어려운 비식음료 업종 (웰니스·화장품·패션·미용 등)</li>
             </ul>
             <p className="mt-2 text-muted-foreground/70">
-              주소만으로 한국관광공사 통계와 매칭된 지역 점수가 나오고, AI가 카테고리 기반 종합 점수를 함께 산출합니다.
+              주소로 한국관광공사 통계와 매칭된 지역 점수가 나오고, AI가 입력하신 서비스·상품을 보고 적합성 점수와 플랫폼별 노출 예상을 산출합니다.
             </p>
           </div>
         )}

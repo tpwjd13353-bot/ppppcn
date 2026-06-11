@@ -32,6 +32,7 @@ interface ManualBody {
   placeName?: string;
   address: string;
   category: ManualCategory;
+  services?: string;
 }
 
 interface UrlBody {
@@ -125,15 +126,23 @@ export async function POST(req: Request) {
     }
   } else {
     const m = body as ManualBody;
+    const servicesText = m.services?.trim() || "";
+    const servicesList = servicesText
+      ? servicesText
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0)
+      : [];
     const ai = await generateManualMenuScore({
       placeName: m.placeName?.trim() || undefined,
       address: m.address.trim(),
       category: m.category,
+      services: servicesText || undefined,
     });
     manualScoreNote = ai.reason;
     place = {
       placeId: `manual-${Date.now()}`,
-      name: m.placeName?.trim() || "오픈예정 매장",
+      name: m.placeName?.trim() || "수기 입력 매장",
       address: m.address.trim(),
       roadAddress: m.address.trim(),
       category: MANUAL_CATEGORY_LABEL[m.category],
@@ -141,13 +150,15 @@ export async function POST(req: Request) {
       sourceUrl: "",
       partial: true,
       notes: [
-        "오픈예정 — 네이버 플레이스 URL 없이 주소·카테고리로 분석.",
+        "수기 입력 — 네이버 플레이스 URL 없이 주소·카테고리·서비스/상품으로 분석.",
         `AI 종합 적합성 점수: ${ai.score} (${ai.model})`,
         ai.reason,
+        ...(servicesList.length > 0 ? [`입력 서비스/상품 ${servicesList.length}건: ${servicesList.join(" / ")}`] : []),
       ],
     };
-    // 합성 데이터에 AI 점수를 일단 저장 (아래 result 갱신에서 사용)
-    (place as NaverPlaceData & { _aiScore?: number })._aiScore = ai.score;
+    // 합성 데이터에 AI 점수·서비스 일단 저장 (아래 result 갱신·플레이북에서 사용)
+    (place as NaverPlaceData & { _aiScore?: number; _services?: string[] })._aiScore = ai.score;
+    (place as NaverPlaceData & { _aiScore?: number; _services?: string[] })._services = servicesList;
   }
 
   // 기본 점수 계산
@@ -180,6 +191,8 @@ export async function POST(req: Request) {
           category: (body as ManualBody).category,
           categoryLabel: MANUAL_CATEGORY_LABEL[(body as ManualBody).category],
           aiScoreReason: manualScoreNote,
+          services:
+            (place as NaverPlaceData & { _services?: string[] })._services ?? [],
         }
       : { isManual: false as const };
 
@@ -222,6 +235,10 @@ export async function POST(req: Request) {
           }
         : null;
     const viral = extractViralMenus(result.details.menu.matches);
+    const manualServices =
+      mode === "manual"
+        ? (place as NaverPlaceData & { _services?: string[] })._services ?? []
+        : [];
     await Promise.race([
       generateAiPlaybook({
         analysisId: id,
@@ -229,6 +246,7 @@ export async function POST(req: Request) {
         result,
         region,
         viral,
+        manualServices,
       }),
       new Promise<void>((resolve) => setTimeout(resolve, 25_000)),
     ]);
