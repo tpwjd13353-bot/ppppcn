@@ -22,6 +22,7 @@ import type { NaverPlaceData } from "@/lib/analyze/naver";
 import { RefineForm } from "./RefineForm";
 import { ScoreGauge } from "./ScoreGauge";
 import { MenuTable } from "./MenuTable";
+import { PrintButton } from "./PrintButton";
 import { auth } from "@/lib/auth";
 import { lookupRegionInsight } from "@/lib/analyze/regionInsightLookup";
 import { lookupLossFromReport } from "@/lib/analyze/lossLookup";
@@ -165,13 +166,16 @@ export default async function ResultPage({
         }}
       />
       <div className="relative z-10">
-      <Link
-        href="/analyze"
-        className="inline-flex items-center gap-1.5 text-sm text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        다시 분석하기
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/analyze"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--rc-txt2)] hover:text-[var(--rc-txt)]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          다시 분석하기
+        </Link>
+        <PrintButton />
+      </div>
 
       {/* 1. 가게 헤더 */}
       <header className="rc-card mt-6">

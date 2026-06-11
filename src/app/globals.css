@@ -296,3 +296,74 @@
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────
+   결과 페이지 인쇄(PDF 저장)용 스타일
+   브라우저 인쇄 → "PDF로 저장" 사용 시
+   배경·색상이 그대로 보존되고 페이지 분할이 자연스럽게 일어나도록.
+   ───────────────────────────────────────── */
+@media print {
+  /* 모든 요소에서 배경 색상·이미지 강제 인쇄 */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 페이지 여백 */
+  @page {
+    size: A4;
+    margin: 12mm 10mm;
+  }
+
+  html,
+  body {
+    background: #0a0a0b !important;
+  }
+
+  /* 인쇄 시 본문 너비 강제 (max-w가 인쇄에서 너무 좁아지지 않도록) */
+  .result-scope {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* PDF 저장 버튼·돌아가기 링크·CTA·헤더는 인쇄에서 숨김 */
+  .rc-print-btn,
+  .result-scope a[href="/analyze"],
+  .result-scope a[href^="#cta"],
+  .result-scope a[href^="/contact"],
+  .result-scope a[href^="/login"],
+  .result-scope a[href*="/pdf"] {
+    display: none !important;
+  }
+
+  /* fixed 워터마크 — 인쇄에선 첫 페이지에만 잡히고 깔끔하지 않으니 제거 */
+  .result-scope > div[aria-hidden] {
+    display: none !important;
+  }
+
+  /* 카드·섹션이 페이지 경계에서 잘리지 않도록 */
+  .result-scope .rc-card,
+  .result-scope .rc-card-sm,
+  .result-scope .rc-card-purple,
+  .result-scope .rc-play,
+  .result-scope section,
+  .result-scope header {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* h2 다음 컨텐츠와 분리되지 않게 */
+  .result-scope h2 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* 그림자/transition 인쇄에선 의미 없음 */
+  .result-scope * {
+    box-shadow: none !important;
+    transition: none !important;
+  }
+}
