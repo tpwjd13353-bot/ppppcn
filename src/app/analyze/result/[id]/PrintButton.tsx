@@ -74,18 +74,39 @@ export function PrintButton({ fileName }: Props) {
 
       const imgData = canvas.toDataURL("image/jpeg", 0.92);
 
-      // 첫 페이지: 이미지 전체를 (0,0)에 박고, 그 다음 페이지부터는 음수 y로 밀어서 같은 이미지를 다른 위치로 노출
-      let heightLeftMm = imgHeightMm;
-      let positionMm = 0;
+      // 페이지 분할:
+      //  - 캔버스 전체를 페이지 너비에 맞춘 imgHeightMm로 환산
+      //  - imgHeightMm를 pageHeightMm 단위로 잘라 페이지마다 음수 y로 밀어서 노출
+      //  - 마지막 페이지는 남은 콘텐츠 높이에 딱 맞게 페이지 크기를 줄여서 흰 여백 제거
+      const totalPages = Math.max(1, Math.ceil(imgHeightMm / pageHeightMm));
+      const bottomPaddingMm = 4;
+      const minLastPageHeightMm = 50;
 
-      pdf.addImage(imgData, "JPEG", 0, positionMm, imgWidthMm, imgHeightMm);
-      heightLeftMm -= pageHeightMm;
+      for (let i = 0; i < totalPages; i++) {
+        const isLast = i === totalPages - 1;
+        const remainingMm = imgHeightMm - i * pageHeightMm;
+        const shrinkLast = isLast && remainingMm < pageHeightMm;
+        const thisPageHeightMm = shrinkLast
+          ? Math.max(remainingMm + bottomPaddingMm, minLastPageHeightMm)
+          : pageHeightMm;
 
-      while (heightLeftMm > 0) {
-        positionMm = heightLeftMm - imgHeightMm; // 음수
-        pdf.addPage();
+        if (i === 0) {
+          // jsPDF가 자동으로 만든 첫 페이지 — 한 페이지로 끝날 만큼 짧으면 크기 줄임
+          if (shrinkLast) {
+            pdf.deletePage(1);
+            pdf.addPage([pageWidthMm, thisPageHeightMm], "portrait");
+          }
+        } else if (shrinkLast) {
+          pdf.addPage([pageWidthMm, thisPageHeightMm], "portrait");
+        } else {
+          pdf.addPage();
+        }
+
+        // 배경 다크 + 이미지를 음수 y로 밀어 해당 페이지 영역 노출
+        pdf.setFillColor(10, 10, 11);
+        pdf.rect(0, 0, pageWidthMm, thisPageHeightMm, "F");
+        const positionMm = -i * pageHeightMm;
         pdf.addImage(imgData, "JPEG", 0, positionMm, imgWidthMm, imgHeightMm);
-        heightLeftMm -= pageHeightMm;
       }
 
       const safeName = (fileName ?? "분석 결과")
