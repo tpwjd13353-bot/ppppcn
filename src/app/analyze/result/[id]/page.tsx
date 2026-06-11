@@ -174,7 +174,7 @@ export default async function ResultPage({
           <ArrowLeft className="h-4 w-4" />
           다시 분석하기
         </Link>
-        <PrintButton />
+        <PrintButton fileName={place.name} />
       </div>
 
       {/* 1. 가게 헤더 */}
