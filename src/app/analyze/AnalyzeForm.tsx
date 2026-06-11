@@ -11,16 +11,32 @@ type Category =
   | "beauty"
   | "cosmetics"
   | "fashion"
+  | "goods"
+  | "wellness"
+  | "pharmacy"
+  | "spa"
+  | "photo"
+  | "eyewear"
+  | "retail"
+  | "experience"
   | "medical"
   | "other";
 
 const CATEGORY_OPTIONS: Array<{ value: Category; label: string }> = [
   { value: "food", label: "음식점" },
   { value: "cafe", label: "카페 · 디저트" },
-  { value: "beauty", label: "미용 · 헤어" },
+  { value: "beauty", label: "미용 · 헤어 · 네일" },
   { value: "cosmetics", label: "화장품 · 뷰티" },
-  { value: "fashion", label: "패션 · 잡화" },
-  { value: "medical", label: "의료 · 성형" },
+  { value: "fashion", label: "패션 (의류 · 신발 · 가방)" },
+  { value: "goods", label: "잡화 · 라이프스타일 (액세서리 · 소품 · 생활용품)" },
+  { value: "wellness", label: "건강 · 웰니스 (건강기능식품 · 영양제 · 웰빙)" },
+  { value: "pharmacy", label: "약국 (의약품 · 한방약 · OTC)" },
+  { value: "spa", label: "마사지 · 스파 · 발마사지 · 찜질방" },
+  { value: "photo", label: "사진관 · 인생네컷 · 셀프스튜디오" },
+  { value: "eyewear", label: "안경 · 아이웨어" },
+  { value: "retail", label: "편의점 · 소매 · 다이소형 매장" },
+  { value: "experience", label: "체험 · 액티비티 (한복 · 클래스 · K-팝 등)" },
+  { value: "medical", label: "의료 · 성형 · 피부과" },
   { value: "other", label: "기타" },
 ];
 
