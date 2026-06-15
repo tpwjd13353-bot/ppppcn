@@ -48,8 +48,10 @@ export const fontSize = {
 
 export const styles = StyleSheet.create({
   // 페이지 — 패딩 0 (배경 이미지 풀브리드용), 콘텐츠는 pageInner 에 패딩
+  // 본문 기본 폰트는 NotoSansSC — 한국어/한자(简体·繁體) 혼용을 단일 폰트로 그리기 위함
+  // (Pretendard는 한자 글리프 미포함이라 .notdef로 깨졌음)
   page: {
-    fontFamily: "Pretendard",
+    fontFamily: "NotoSansSC",
     fontSize: fontSize.base,
     color: colors.text,
     backgroundColor: colors.bg,
