@@ -187,6 +187,7 @@ STEP 1 분석을 근거로, 아래 구조·원칙에 맞춰 작성하세요. STE
 - 클라이언트 카테고리(화장품/음식점 등)에 맞춰 콘텐츠 4축과 차별화 포인트를 재설정할 것.
 - **이모지·아이콘 글리프 절대 사용 금지** (🔍 ✨ 🎯 📊 등 모두 금지). PDF 폰트(Pretendard)가 렌더하지 못해 깨집니다. 강조가 필요하면 텍스트로만 표현하세요.
 - 글머리 기호로 쓸 수 있는 문자: ·(가운뎃점), -(하이픈), ①②③④, ▶, "[라벨]" 형태만 허용.
+- **출처 인용·하이퍼링크·괄호 출처 표기 절대 금지.** 웹 검색으로 얻은 사실도 본문 안에 자연스러운 한국어 서술로만 녹여 쓰고, 마크다운 링크(\`[텍스트](url)\`), 괄호 출처(\`(siksinhot.com)\`, \`(출처: 네이버)\`), URL, 각주 번호(\`[1]\` 등) 모두 출력에 절대 포함하지 마세요. 발견한 사실의 출처를 밝히고 싶으면 본문에 "○○ 매체에 소개된 바에 따르면" 같은 자연스러운 표현으로만 녹여 쓰세요.
 `;
 
 function buildUserPrompt(place: NaverPlaceData, issuedAt: Date): string {
@@ -214,6 +215,46 @@ function buildUserPrompt(place: NaverPlaceData, issuedAt: Date): string {
     "4) Phase 1은 '따종디엔핑 광고 액티브 스타트'로 톤을 잡고, '콜드스타트' 표현은 사용하지 마세요. '약속 불가' 같은 사전 면책 표현도 사용하지 마세요.",
     "5) 시스템 프롬프트에 명시된 JSON 스키마만 출력하세요.",
   ].join("\n");
+}
+
+/**
+ * LLM 응답에서 자동으로 끼어들어오는 출처 인용·하이퍼링크·각주를 제거.
+ * web_search 도구가 본문에 ([domain.com](https://...?utm_source=openai)) 형태로
+ * 박는 마크다운 링크와 그 변형들을 안전망으로 한 번 더 정리합니다.
+ */
+function stripCitations(input: string): string {
+  let s = input;
+  // 1) 괄호로 감싼 마크다운 링크: ([텍스트](https://...))  또는 ([텍스트](https://...))을 둘러싼 콤마/공백 정리
+  s = s.replace(/\s*\(\s*\[[^\]]*\]\(https?:\/\/[^)]+\)\s*\)/g, "");
+  // 2) 그냥 마크다운 링크: [텍스트](https://...)
+  s = s.replace(/\[([^\]]*)\]\(https?:\/\/[^)]+\)/g, "$1");
+  // 3) 노출된 URL: http:// 또는 https:// 시작 토큰
+  s = s.replace(/https?:\/\/[^\s)\]]+/g, "");
+  // 4) 괄호 출처 표기: (출처: ...), (source: ...)
+  s = s.replace(/\(\s*(?:출처|source|Source)\s*[::][^)]*\)/g, "");
+  // 5) 각주 번호: [1], [12]
+  s = s.replace(/\[\d+\]/g, "");
+  // 6) 빈 괄호·중복 공백·앞뒤 공백 정리
+  s = s.replace(/\(\s*\)/g, "").replace(/[ \t]{2,}/g, " ").replace(/\s+([.,!?·])/g, "$1");
+  return s;
+}
+
+/** ProposalData 트리의 모든 문자열에 stripCitations 적용 */
+function sanitizeProposalCitations<T>(value: T): T {
+  if (typeof value === "string") {
+    return stripCitations(value) as unknown as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => sanitizeProposalCitations(v)) as unknown as T;
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = sanitizeProposalCitations(v);
+    }
+    return out as unknown as T;
+  }
+  return value;
 }
 
 function tryParseJson(text: string): ProposalData {
@@ -269,7 +310,7 @@ export async function generateProposal(
         ],
       });
       const text = res.output_text ?? "";
-      const data = tryParseJson(text);
+      const data = sanitizeProposalCitations(tryParseJson(text));
       return { data, webUsed: true };
     } catch (e) {
       // 웹 검색 실패 시 폴백
@@ -287,6 +328,6 @@ export async function generateProposal(
     ],
   });
   const content = completion.choices[0]?.message?.content ?? "{}";
-  const data = tryParseJson(content);
+  const data = sanitizeProposalCitations(tryParseJson(content));
   return { data, webUsed: false };
 }
