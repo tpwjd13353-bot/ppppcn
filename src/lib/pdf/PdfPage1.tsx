@@ -321,7 +321,7 @@ export function PdfPage1({
               ? `${sigungu} 연 방문 중국 관광객`
               : "연 방문 중국 관광객"
           }
-          note={sigungu ? `전국 ${loss?.nationalRank}위` : ""}
+          note={sigungu ? `외래객 방문 전국 ${loss?.nationalRank}위` : ""}
           highlight
         />
         <DataCard big="70%" small="디엔핑 사용률" note="외식 검색 1위" />
@@ -334,7 +334,7 @@ export function PdfPage1({
         <View>
           {loss && (
             <Text>
-              {loss.sigungu}는 전국 외국인 방문 {loss.nationalRank}위 시군구입니다
+              {loss.sigungu}는 한국관광공사 외래객 방문 시군구 {loss.nationalRank}위입니다
             </Text>
           )}
           <Text style={{ marginTop: 2 }}>
