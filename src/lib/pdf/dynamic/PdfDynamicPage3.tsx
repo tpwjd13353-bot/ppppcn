@@ -15,7 +15,7 @@ export function PdfDynamicPage3({
   const row1 = axes.slice(0, 2);
   const row2 = axes.slice(2, 4);
   return (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" style={styles.page} wrap={false}>
       <BackgroundImage />
       <View style={styles.pageInner}>
         {/* 섹션 4. Phase 2 */}

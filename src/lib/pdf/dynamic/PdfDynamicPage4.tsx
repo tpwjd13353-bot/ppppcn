@@ -21,7 +21,7 @@ export function PdfDynamicPage4({
   contact: ContactInfo;
 }) {
   return (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" style={styles.page} wrap={false}>
       <BackgroundImage />
       <View style={styles.pageInner}>
         {/* 섹션 6. 예산 · 운영 구조 */}

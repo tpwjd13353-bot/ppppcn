@@ -12,7 +12,7 @@ export function PdfDynamicPage2({
   clientName: string;
 }) {
   return (
-    <Page size="A4" style={styles.page}>
+    <Page size="A4" style={styles.page} wrap={false}>
       <BackgroundImage />
       <View style={styles.pageInner}>
         {/* 섹션 2. 단계 전략 개요 */}
