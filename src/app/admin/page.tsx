@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText, Users as UsersIcon, Sparkles } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Save, Lock, LogOut, Download, Inbox, FileText, Users as UsersIcon, Sparkles, KeyRound } from "lucide-react";
 import {
   GRADIENT_PRESETS,
   PLATFORM_OPTIONS,
@@ -250,6 +250,13 @@ export default function AdminPage() {
             >
               <UsersIcon className="h-4 w-4" />
               회원 관리
+            </a>
+            <a
+              href="/account/password"
+              className="inline-flex items-center gap-2 rounded-md border border-border/50 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-primary"
+            >
+              <KeyRound className="h-4 w-4" />
+              비밀번호 변경
             </a>
             <button
               onClick={logout}
