@@ -175,7 +175,7 @@ export function AnalyzeForm({ tier }: Props) {
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary/50 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
               >
                 <MapPin className="h-3.5 w-3.5" />
-                네이버 지도에서 내 매장 찾기
+                플레이스 찾으러 가기
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>
