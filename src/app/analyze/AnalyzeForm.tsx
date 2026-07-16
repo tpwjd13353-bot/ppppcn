@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Search, AlertCircle, Link2, Building2 } from "lucide-react";
+import { Loader2, Search, AlertCircle, Link2, Building2, ExternalLink, MapPin } from "lucide-react";
 
 type Mode = "url" | "manual";
 type Category =
@@ -164,9 +164,21 @@ export function AnalyzeForm({ tier }: Props) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {mode === "url" ? (
           <>
-            <label htmlFor="naver-url" className="text-sm font-medium">
-              네이버 플레이스 URL
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="naver-url" className="text-sm font-medium">
+                네이버 플레이스 URL
+              </label>
+              <a
+                href="https://m.map.naver.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-primary/50 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground"
+              >
+                <MapPin className="h-3.5 w-3.5" />
+                네이버 지도에서 내 매장 찾기
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
             <input
               id="naver-url"
               type="text"
