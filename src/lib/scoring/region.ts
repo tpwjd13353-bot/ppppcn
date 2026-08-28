@@ -12,6 +12,20 @@ import type { RegionScore } from "@/lib/types/scoring";
 
 const FALLBACK_SCORE = 30;
 
+// 정식명 → 흔히 쓰이는 2자 축약형 매핑.
+// 도(道) 6개는 "경상북도" → "경상북" 규칙으로는 못 잡히는 "경북"/"경남"/"충북"/"충남"/"전북"/"전남"을 별도 등록.
+const SIDO_SHORT_ALIASES: Record<string, string[]> = {
+  경상북도: ["경북"],
+  경상남도: ["경남"],
+  충청북도: ["충북"],
+  충청남도: ["충남"],
+  전라북도: ["전북"],
+  전라남도: ["전남"],
+  전북특별자치도: ["전북"],
+  강원특별자치도: ["강원"],
+  제주특별자치도: ["제주"],
+};
+
 function sidoAliases(name: string): string[] {
   const out = [name];
   const trimmed = name
@@ -21,6 +35,9 @@ function sidoAliases(name: string): string[] {
     .replace(/광역시$/, "")
     .replace(/도$/, "");
   if (trimmed && trimmed !== name) out.push(trimmed);
+  for (const extra of SIDO_SHORT_ALIASES[name] ?? []) {
+    if (!out.includes(extra)) out.push(extra);
+  }
   return out;
 }
 

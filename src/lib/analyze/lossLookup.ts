@@ -54,6 +54,32 @@ function shortenSido(sido: string): string {
   return sido.replace(/(특별자치도|특별자치시|특별시|광역시|도)$/g, "");
 }
 
+// "경상북도" → ["경상북도", "경상북", "경북"] 처럼 정식·긴축약·짧은축약 모두 반환.
+// 도(道) 6개는 "경상북" → "경북" 축약형도 별도로 등록해야 매칭됨.
+const SIDO_SHORT_ALIASES: Record<string, string[]> = {
+  경상북도: ["경북"],
+  경상남도: ["경남"],
+  충청북도: ["충북"],
+  충청남도: ["충남"],
+  전라북도: ["전북"],
+  전라남도: ["전남"],
+  전북특별자치도: ["전북"],
+  강원특별자치도: ["강원"],
+  제주특별자치도: ["제주"],
+};
+
+function sidoAliases(sido: string): string[] {
+  const out = new Set<string>([sido]);
+  const trimmed = shortenSido(sido);
+  if (trimmed && trimmed !== sido) out.add(trimmed);
+  for (const extra of SIDO_SHORT_ALIASES[sido] ?? []) out.add(extra);
+  return Array.from(out);
+}
+
+function addrHasSido(addr: string, sido: string): boolean {
+  return sidoAliases(sido).some((a) => a.length >= 2 && addr.includes(a));
+}
+
 export async function lookupLossFromReport(report: {
   place: NaverPlaceData;
   result: AnalysisResult;
@@ -68,8 +94,9 @@ export async function lookupLossFromReport(report: {
   if (!addr.trim()) return null;
 
   // 1순위: 시군구 정밀 매칭 (csv 48개)
+  //   시도 매칭은 축약형("경북" 등)까지 인식하도록 sidoAliases 사용.
   for (const stat of data.regionStats) {
-    if (addr.includes(stat.sigungu) && addr.includes(stat.sido.slice(0, 2))) {
+    if (addr.includes(stat.sigungu) && addrHasSido(addr, stat.sido)) {
       return estimateLoss(stat.sido, stat.sigungu);
     }
   }
@@ -81,9 +108,10 @@ export async function lookupLossFromReport(report: {
   }
 
   // 3순위: 시도 fallback — 같은 시도 시군구들 평균
+  //   축약형("경북" 등)까지 인식.
   for (const sidoFull of SIDOS_FULL) {
     const short = shortenSido(sidoFull);
-    if (short.length >= 2 && addr.includes(short.slice(0, 2))) {
+    if (short.length >= 2 && addrHasSido(addr, sidoFull)) {
       const sameSido = data.regionStats.filter(
         (s) => shortenSido(s.sido).slice(0, 2) === short.slice(0, 2),
       );
