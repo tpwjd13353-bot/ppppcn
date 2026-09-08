@@ -8,6 +8,7 @@
 // 5) 사용 카운트 증가
 
 import { auth } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { db, schema } from "@/lib/db";
 import { fetchPlaceData, NaverParseError } from "@/lib/analyze/naver";
 import { analyzeStore } from "@/lib/scoring";
@@ -43,6 +44,19 @@ interface UrlBody {
 type AnalyzeBody = ManualBody | UrlBody;
 
 export async function POST(req: Request) {
+  // 어드민 전용 API — 프론트 페이지 가드와 이중 방어. URL 직접 호출로 우회 못 하게.
+  const gateSession = await auth();
+  if (!isAdminEmail(gateSession?.user?.email)) {
+    return Response.json(
+      {
+        ok: false,
+        error: "AI 분석 도구는 담당자 전용입니다.",
+        hint: "이용을 원하시면 카카오톡 오픈채팅으로 문의해주세요.",
+      },
+      { status: 403 },
+    );
+  }
+
   let body: Partial<AnalyzeBody>;
   try {
     body = await req.json();
