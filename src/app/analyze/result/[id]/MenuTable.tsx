@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { MenuMatch } from "@/lib/types/scoring";
 
@@ -15,11 +15,22 @@ function scoreClass(score: number): string {
   return "text-[var(--rc-red)]";
 }
 
+// 정렬 규칙: (1) 매칭된 메뉴가 위, (2) 매칭 안에서 점수 높은 순, (3) 그 다음이 매칭 안 됨(정보 부족)
+function sortMatches(list: MenuMatch[]): MenuMatch[] {
+  return [...list].sort((a, b) => {
+    if (a.matched !== b.matched) return a.matched ? -1 : 1;
+    const sa = a.score ?? -1;
+    const sb = b.score ?? -1;
+    return sb - sa;
+  });
+}
+
 export function MenuTable({ matches, initialVisible = 10 }: Props) {
   const [open, setOpen] = useState(false);
-  const head = matches.slice(0, initialVisible);
-  const rest = matches.slice(initialVisible);
-  const visible = open ? matches : head;
+  const sorted = useMemo(() => sortMatches(matches), [matches]);
+  const head = sorted.slice(0, initialVisible);
+  const rest = sorted.slice(initialVisible);
+  const visible = open ? sorted : head;
 
   return (
     <div className="mt-5 overflow-hidden rounded-[18px] border border-[var(--rc-lineS)] bg-[var(--rc-surface)]">
