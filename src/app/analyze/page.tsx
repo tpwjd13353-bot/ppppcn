@@ -9,7 +9,7 @@ import { isAdminEmail } from "@/lib/admin";
 // 담당자·문의 채널 — 사이트 다른 곳과 정보 통일
 const KAKAO_OPEN_CHAT = "https://open.kakao.com/o/skmX5Pwi";
 const CONTACT_PHONE = "010-2991-5990";
-const CONTACT_NAME = "세정 담당자";
+const CONTACT_NAME = "김세정 본부장";
 
 export const metadata = {
   title: "AI 상권 분석 (어드민 전용) — 퍼플페퍼",
