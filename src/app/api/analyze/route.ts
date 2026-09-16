@@ -8,7 +8,6 @@
 // 5) 사용 카운트 증가
 
 import { auth } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { db, schema } from "@/lib/db";
 import { fetchPlaceData, NaverParseError } from "@/lib/analyze/naver";
 import { analyzeStore } from "@/lib/scoring";
@@ -44,16 +43,16 @@ interface UrlBody {
 type AnalyzeBody = ManualBody | UrlBody;
 
 export async function POST(req: Request) {
-  // 어드민 전용 API — 프론트 페이지 가드와 이중 방어. URL 직접 호출로 우회 못 하게.
+  // 로그인 필수 — 비회원은 즉시 401. 이후 rate-limit이 회원 24h 3회 / 어드민 무제한 처리.
   const gateSession = await auth();
-  if (!isAdminEmail(gateSession?.user?.email)) {
+  if (!gateSession?.user?.id) {
     return Response.json(
       {
         ok: false,
-        error: "AI 분석 도구는 담당자 전용입니다.",
-        hint: "이용을 원하시면 카카오톡 오픈채팅으로 문의해주세요.",
+        error: "AI 분석은 회원 전용입니다.",
+        hint: "회원 가입 후 하루 3회 무료로 이용하실 수 있어요.",
       },
-      { status: 403 },
+      { status: 401 },
     );
   }
 

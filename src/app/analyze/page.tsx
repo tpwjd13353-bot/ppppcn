@@ -1,30 +1,26 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { MessageCircle, Phone, Lock, Sparkles } from "lucide-react";
+import { UserPlus, LogIn, MessageCircle, Sparkles } from "lucide-react";
 import { AnalyzeForm } from "./AnalyzeForm";
-import { checkRateLimit } from "@/lib/analyze/rate-limit";
+import { checkRateLimit, LIMITS } from "@/lib/analyze/rate-limit";
 import { auth } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 
-// 담당자·문의 채널 — 사이트 다른 곳과 정보 통일
+// 문의 채널 (로그인 안 된 방문자용 보조 CTA)
 const KAKAO_OPEN_CHAT = "https://open.kakao.com/o/skmX5Pwi";
-const CONTACT_PHONE = "010-2991-5990";
-const CONTACT_NAME = "김세정 본부장";
 
 export const metadata = {
-  title: "AI 상권 분석 (어드민 전용) — 퍼플페퍼",
+  title: "AI 상권 분석 — 퍼플페퍼",
   description:
-    "어드민 계정으로 로그인한 담당자만 사용할 수 있는 AI 매장 분석 도구입니다.",
+    "네이버 플레이스 URL 하나로 중국 관광객 상권 적합성을 자동 분석합니다. 회원 가입 후 하루 3회 무료.",
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyzePage() {
   const session = await auth();
-  const admin = isAdminEmail(session?.user?.email);
 
-  if (!admin) {
-    return <AdminOnlyNotice loggedIn={!!session?.user} />;
+  if (!session?.user) {
+    return <LoginRequiredNotice />;
   }
 
   const h = await headers();
@@ -35,7 +31,7 @@ export default async function AnalyzePage() {
     <main className="mx-auto w-full max-w-3xl px-6 py-16 md:py-24">
       <header className="text-center">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
-          따종디엔핑 분석 도구 · 어드민 전용
+          따종디엔핑 분석 도구
         </p>
         <h1 className="mt-4 font-heading text-4xl font-bold tracking-tight md:text-5xl">
           중국 관광객, 우리 가게 어때?
@@ -47,7 +43,11 @@ export default async function AnalyzePage() {
         </p>
       </header>
 
-      <AnalyzeForm tier={limit.tier} />
+      <AnalyzeForm
+        tier={limit.tier}
+        remaining={limit.remaining}
+        limit={limit.limit}
+      />
 
       <section className="mt-16 grid gap-6 md:grid-cols-3">
         <Step n={1} title="네이버 URL 입력" body="모바일 / PC URL 모두 가능" />
@@ -58,83 +58,82 @@ export default async function AnalyzePage() {
   );
 }
 
-function AdminOnlyNotice({ loggedIn }: { loggedIn: boolean }) {
+function LoginRequiredNotice() {
+  const dailyLimit = LIMITS.analyze.member;
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-20 md:py-28">
       <header className="text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/40 bg-primary/10">
-          <Lock className="h-6 w-6 text-primary" />
+          <Sparkles className="h-6 w-6 text-primary" />
         </div>
         <p className="mt-6 text-xs font-medium uppercase tracking-[0.2em] text-primary">
-          AI 상권 분석 · 어드민 전용
+          AI 상권 분석
         </p>
         <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">
-          이 페이지는 담당자만 사용할 수 있어요
+          로그인하시면 바로 사용하실 수 있어요
         </h1>
         <p className="mt-4 text-base text-muted-foreground md:text-lg">
-          매장별 AI 분석 · 잠재 손실 리포트 · PDF 다운로드는 퍼플페퍼 내부 담당자만
-          이용 가능한 도구입니다.
+          회원 가입 시 하루 {dailyLimit}회 무료 분석을 제공합니다.
           <br />
-          분석이 필요하시면 아래로 편하게 연락 주세요.
+          네이버 플레이스 URL만 넣으시면 1분 안에 점수 보고서가 나옵니다.
         </p>
       </header>
 
-      <section className="mt-12 space-y-4">
-        <a
-          href={KAKAO_OPEN_CHAT}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-4 rounded-2xl border border-[#FEE500]/60 bg-[#FEE500]/10 p-5 transition hover:border-[#FEE500] hover:bg-[#FEE500]/20"
+      <section className="mt-12 space-y-3">
+        <Link
+          href="/signup?callbackUrl=/analyze"
+          className="group flex items-center gap-4 rounded-2xl border border-primary bg-primary p-5 text-primary-foreground transition hover:opacity-90"
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FEE500]">
-            <MessageCircle className="h-6 w-6 text-black" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15">
+            <UserPlus className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">
-              가장 빠른 응답 · 평균 10분 이내
+            <p className="text-sm font-medium opacity-80">
+              처음이신가요?
             </p>
-            <p className="mt-1 text-lg font-bold">카카오톡으로 문의하기</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              매장 URL 또는 상호명을 보내주시면 AI 분석 결과를 회신드립니다.
+            <p className="mt-1 text-lg font-bold">회원가입하고 바로 분석하기</p>
+            <p className="mt-1 text-xs opacity-75">
+              가입 즉시 하루 {dailyLimit}회 무료 이용 가능
             </p>
           </div>
-          <Sparkles className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
-        </a>
+        </Link>
 
-        <a
-          href={`tel:${CONTACT_PHONE.replace(/-/g, "")}`}
+        <Link
+          href="/login?callbackUrl=/analyze"
           className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-background/40 p-5 transition hover:border-primary hover:bg-background/60"
         >
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background">
-            <Phone className="h-5 w-5 text-primary" />
+            <LogIn className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">
-              전화 상담 · 평일 10:00 ~ 19:00
+              이미 회원이신가요?
             </p>
-            <p className="mt-1 text-lg font-bold tracking-wide">
-              {CONTACT_PHONE}
-            </p>
+            <p className="mt-1 text-lg font-bold">로그인하기</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {CONTACT_NAME} · 퍼플페퍼 co., Ltd.
+              카카오톡 또는 이메일 로그인
             </p>
           </div>
-        </a>
+        </Link>
       </section>
 
-      <p className="mt-10 text-center text-xs text-muted-foreground/70">
-        {loggedIn
-          ? "이미 로그인된 계정은 어드민 권한이 없습니다. 담당자 계정이 필요하시면 위 채널로 문의해주세요."
-          : "담당자 계정을 가지고 계시면 로그인 후 이용해주세요."}{" "}
-        {!loggedIn && (
-          <Link
-            href="/login?callbackUrl=/analyze"
-            className="text-primary underline underline-offset-2 hover:text-primary/80"
+      <div className="mt-10 rounded-xl border border-border/40 bg-background/40 p-5">
+        <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <MessageCircle className="h-3.5 w-3.5" />
+          궁금한 점이 있으신가요?
+        </p>
+        <p className="mt-2 text-sm">
+          <a
+            href={KAKAO_OPEN_CHAT}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
           >
-            로그인
-          </Link>
-        )}
-      </p>
+            카카오톡 오픈채팅
+          </a>
+          {"으로 편하게 문의 주세요. 매장 URL 보내주시면 담당자가 직접 분석 결과를 드립니다."}
+        </p>
+      </div>
     </main>
   );
 }

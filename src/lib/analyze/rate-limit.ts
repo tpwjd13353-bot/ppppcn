@@ -1,9 +1,9 @@
 // 사용 횟수 제한
 //
-//                  분석          PDF 다운로드
-//   비회원         무제한        불가 (가입 유도)
-//   회원           무제한        계정당 총 3회 (lifetime)
-//   어드민         무제한        무제한
+//                  분석                  PDF 다운로드
+//   비회원         불가 (가입 유도)      불가 (가입 유도)
+//   회원           24시간 3회            계정당 총 3회 (lifetime)
+//   어드민         무제한                무제한
 
 import crypto from "node:crypto";
 import { and, gte, eq } from "drizzle-orm";
@@ -11,10 +11,10 @@ import { db, schema } from "@/lib/db";
 import { isAdminEmail } from "@/lib/admin";
 import { auth } from "@/lib/auth";
 
-const WINDOW_MS = 24 * 60 * 60 * 1000; // (현재 미사용 - 향후 윈도우 제한 필요 시)
+const WINDOW_MS = 24 * 60 * 60 * 1000; // 24h — analyze 슬라이딩 윈도우
 
 export const LIMITS = {
-  analyze: { guest: Number.POSITIVE_INFINITY, member: Number.POSITIVE_INFINITY },
+  analyze: { guest: 0, member: 3 },
   pdf: { guest: 0, member: 3 },
 } as const;
 
@@ -89,15 +89,29 @@ export async function checkRateLimit(
       ? "member"
       : "guest";
 
-  // 분석은 누구나 무제한
+  // 분석 — 어드민 무제한 / 회원 24시간 3회 / 비회원 불가
   if (type === "analyze") {
-    return {
-      allowed: true,
-      remaining: Number.POSITIVE_INFINITY,
-      used: 0,
-      limit: Number.POSITIVE_INFINITY,
-      tier,
-    };
+    if (ctx.isAdmin) {
+      return {
+        allowed: true,
+        remaining: Number.POSITIVE_INFINITY,
+        used: 0,
+        limit: Number.POSITIVE_INFINITY,
+        tier: "admin",
+      };
+    }
+    if (ctx.userId) {
+      const limit = LIMITS.analyze.member; // 24h 3회
+      const used = await getUserUsageCount(ctx.userId, "analyze", false);
+      return {
+        allowed: used < limit,
+        remaining: Math.max(0, limit - used),
+        used,
+        limit,
+        tier: "member",
+      };
+    }
+    return { allowed: false, remaining: 0, used: 0, limit: 0, tier: "guest" };
   }
 
   // PDF

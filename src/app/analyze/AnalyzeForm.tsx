@@ -42,9 +42,11 @@ const CATEGORY_OPTIONS: Array<{ value: Category; label: string }> = [
 
 interface Props {
   tier: "guest" | "member" | "admin";
+  remaining?: number;
+  limit?: number;
 }
 
-export function AnalyzeForm({ tier }: Props) {
+export function AnalyzeForm({ tier, remaining, limit }: Props) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("url");
 
@@ -125,8 +127,23 @@ export function AnalyzeForm({ tier }: Props) {
         <span>
           {tier === "admin" ? (
             <span className="text-primary">어드민: 무제한 이용</span>
+          ) : tier === "member" && typeof remaining === "number" && typeof limit === "number" ? (
+            <span>
+              오늘 남은 분석{" "}
+              <span
+                className={
+                  remaining === 0
+                    ? "font-bold text-destructive"
+                    : "font-bold text-primary"
+                }
+              >
+                {remaining}
+              </span>
+              <span className="text-muted-foreground/70">/{limit}회</span>
+              <span className="ml-1.5 text-muted-foreground/70">(24시간 리셋)</span>
+            </span>
           ) : (
-            <span>상권 분석 무제한 · PDF 보고서는 회원 가입 후 3회</span>
+            <span>상권 분석 하루 3회 · PDF 보고서는 계정당 3회</span>
           )}
         </span>
       </div>
