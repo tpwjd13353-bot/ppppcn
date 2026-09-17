@@ -71,15 +71,20 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
-  // 네이버 웹마스터 도구 소유 확인 (발급 후 값 교체)
+  // 검색엔진 소유권 확인 (환경변수로 값 주입).
+  // - 구글: Next.js 전용 필드 verification.google 사용 (표준 태그 형식 100% 보장)
+  // - 네이버: 전용 필드가 없어 verification.other로 넣음
   verification: {
-    other: {
-      "naver-site-verification":
-        process.env.NEXT_PUBLIC_NAVER_VERIFICATION ?? "",
-      ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
-        ? { "google-site-verification": process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION }
-        : {}),
-    },
+    ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_NAVER_VERIFICATION
+      ? {
+          other: {
+            "naver-site-verification": process.env.NEXT_PUBLIC_NAVER_VERIFICATION,
+          },
+        }
+      : {}),
   },
   category: "marketing",
 };
